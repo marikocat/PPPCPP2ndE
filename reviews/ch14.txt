@@ -1,0 +1,133 @@
+1. What is an application domain?
+An application domain is the segment of reality for which a software system is developed. It is the background or starting point for the actual-state analysis and the creation of a domain model.
+An application domain can be an organization, a department within an organization, or a single workplace.
+The concept of an application domain is at least as wide, so that the domain concepts and relations relevant for the construction of models can be well understood during the analysis of the actual state of the domain. On the other hand, its extent should always be limited, that is, never be too complex.
+
+Graphics is an example of an application domain.
+The set of our graphics interface classes is a library; the classes are meant to be used together and in combination.
+Together, our classes present a view of how to do graphics. We must ensure that this view is reasonably elegant and coherent.
+Given the size of our library and the enormity of the domain of graphical applications, we cannot hope for completeness.
+Instead, we aim for simplicity and extensibility.
+In fact, no class library directly models all aspects of its application domain. That’s not only impossible; it is also pointless.
+
+A good library directly and cleanly models its application domain
+from a particular perspective, emphasizes some aspects of the application, and deemphasizes others.
+
+2. What are ideals for naming?
+3. What can we name?
+We want the interfaces of our classes to show a common style. For example, all functions performing similar operations in
+different classes have the same name, take arguments of the same types, and where possible require those arguments in the
+same order.
+Logically identical operations have the same name. For example, every function that adds points, lines, etc. to any kind of
+shape is called add(), and any function that draws lines is called draw_lines(). Such uniformity helps us remember (by
+offering fewer details to remember) and helps us when we design new classes (“just do the usual”). Sometimes, it even allows
+us to write code that works for many different types, because the operations on those types have an identical pattern. Such code
+is called generic.
+Logically different operations have different names. Again, that would seem obvious, but consider: why do we “attach” a
+Shape to a Window, but “add” a Line to a Shape? In both cases, we “put something into something,” so shouldn’t that
+similarity be reflected by a common name? No. The similarity hides a fundamental difference.
+
+4. What services does a Shape offer?
+Class Shape represents the general notion of something that can appear in a Window on a screen:
+• It is the notion that ties our graphical objects to our Window abstraction, which in turn provides the connection to the
+operating system and the physical screen.
+• It is the class that deals with color and the style used to draw lines. To do that it holds a Line_style, a Color for lines,
+and a Color for fill.
+• It can hold a sequence of Points and has a basic notion of how to draw them.
+
+5. How does an abstract class differ from a class that is not abstract?
+A class is abstract if it can be used only as a base class. A class that can be used to create objects — that is, the opposite of an abstract class — is
+called a concrete class.
+An abstract class is a class that can be used only as a base class. We use abstract classes to represent concepts that are
+abstract; that is, we use abstract classes for concepts that are generalizations of common characteristics of related entities.
+
+6. How can you make a class abstract?
+The constructors are protected. That means that they can only be used directly from classes derived from Shape (using the
+:Shape notation). In other words, Shape can only be used as a base for classes, such as Line and Open_polyline. The
+purpose of that protected: is to ensure that we don’t make Shape objects directly.
+The other — more common — way of achieving that is called a pure virtual function.
+This way of making a class abstract: state that one or more of its virtual functions needs to be overridden in some
+derived class.
+
+7. What is controlled by access control?
+Access to class members.
+
+8. What good can it do to make a data member private?
+The basic answer is that protecting the representation ensures that it doesn’t change in ways unanticipated by a
+class designer so that we can write better classes with less effort. This is the argument about “invariants”.
+In addition, the access functions often provide notational convenience. For example, s.add(p) is easier to read and write
+than s.points.push_back(p).
+
+9. What is a virtual function and how does it differ from a non-virtual function?
+Virtual functions: the ability to define a function in a base class and have a function of the same name and type in a
+derived class called when a user calls the base class function. For example, when Window calls draw_lines() for a
+Shape that is a Circle, it is the Circle’s draw_lines() that is executed, rather than Shape’s own draw_lines(). This
+is often called run-time polymorphism, dynamic dispatch, or run-time dispatch because the function called is
+determined at run time based on the type of the object used.
+
+10. What is a base class?
+11. What makes a class derived?
+Derivation: a way to build one class from another so that the new class can be used in place of the original. For
+example, Circle is derived from Shape, or in other words, “a Circle is a kind of Shape” or “Shape is a base of
+Circle.” The derived class (here, Circle) gets all of the members of its base (here, Shape) in addition to its own. This
+is often called inheritance because the derived class “inherits” all of the members of its base. In some contexts, a
+derived class is called a subclass and a base class is called a superclass.
+We specify that a class is to be a derived class by mentioning a base after the class name.
+
+12. What do we mean by object layout?
+How are objects laid out in memory? As we saw in §9.4.1, members of a class define the layout of objects: data members are
+stored one after another in memory. When inheritance is used, the data members of a derived class are simply added after those
+of a base.
+
+13. What can you do to make a class easier to test?
+The basic answer is that protecting the representation ensures that it doesn’t change in ways unanticipated by a
+class designer so that we can write better classes with less effort. This is the argument about “invariants”.
+
+14. What is an inheritance diagram?
+A diagram of our interface classes showing their inheritance relationships. The arrows point from a derived class to its base. Such diagrams help visualize class relationships.
+
+15. What is the difference between a protected member and a private one?
+• Private: If a member is private, its name can be used only by members of the class in which it is declared.
+• Protected: If a member is protected, its name can be used only by members of the class in which it is declared and
+members of classes derived from that.
+
+16. What members of a class can be accessed from a class derived from it?
+Public and protected if base class is public or protected.
+A base can also be private, protected, or public:
+• If a base of class D is private, its public and protected member names can be used only by members of D.
+• If a base of class D is protected, its public and protected member names can be used only by members of D and
+members of classes derived from D.
+• If a base is public, its public member names can be used by all functions.
+
+17. How does a pure virtual function differ from other virtual functions?
+The virtual void f() =0 notation says that the virtual functions B::f() and B::g() are “pure”; that is, they must be overridden in some
+derived class. Since B has pure virtual functions, we cannot create an object of class B.
+
+18. Why would you make a member function virtual?
+To use polymorphism.
+A design that does not provide interface inheritance (that is, a design for which an object of a derived class cannot be used as
+an object of its public base class) is a poor and error-prone design.
+
+19. Why would you make a virtual member function pure?
+It must be overriden in derived classes.
+Note that unless all pure virtual functions are overridden, the resulting class is still abstract.
+
+20. What does overriding mean?
+Defining a function of the same name and type as a virtual function from a base class (such as Circle::draw_lines()) so
+that the function from the derived class is put into the vtbl instead of the version from the base is called overriding. For
+example, Circle::draw_lines() overrides Shape::draw_lines().
+
+21. How does interface inheritance differ from implementation inheritance?
+• Interface inheritance: A function expecting a Shape (usually as a reference argument) can accept a Circle (and can use
+a Circle through the interface provided by Shape).
+• Implementation inheritance: When we define Circle and its member functions, we can take advantage of the facilities
+(such as data and member functions) offered by Shape.
+Interface inheritance gets its name because its benefits come from code using the interface provided by a base class (“an
+interface”; here, Shape) and not having to know about the derived classes (“implementations”; here, classes derived from
+Shape).
+Implementation inheritance gets its name because the benefits come from the simplification in the implementation of derived
+classes (e.g., Circle) provided by the facilities offered by the base class (here, Shape).
+
+22. What is object-oriented programming?
+The use of inheritance, run-time polymorphism, and encapsulation is the most common definition of object-oriented
+programming.
