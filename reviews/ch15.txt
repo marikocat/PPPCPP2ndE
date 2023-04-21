@@ -1,0 +1,61 @@
+1. What is a function of one argument?
+y = f(x)
+2. When would you use a (continuous) line to represent data? When do you use (discrete) points?
+There are many ways of looking at a set of (x,y) pairs. When considering how to graph such a set it is important to consider
+whether one value is in some way a function of the other. For example, for a (year,steel production) pair it would be quite
+reasonable to consider the steel production a function of the year and display the data as a continuous line. Open_polyline
+(§13.6) is the obvious choice for graphing such data. If y should not be seen as a function of x, for example (gross domestic
+product per person,population of country), Marks (§13.15) can be used to plot unconnected points.
+
+3. What function (mathematical formula) defines a slope?
+f(x) = x / 2;
+
+4. What is a parabola?
+f(x) = x^2;
+
+5. How do you make an x axis? A y axis?
+Axis x{Axis::x, beginning_point, length_of_axis, number_of_notches, label};
+
+6. What is a default argument and when would you use one?
+If function formal arguments were given initializers in the declaration, such initializers are called default arguments and their values are used if a caller doesn’t supply values. Default arguments are used as an alternative to providing several overloaded functions.
+It would have been more work to define overloaded functions and with such approach the nature of the default is
+hidden in the function definitions rather than being obvious from the declaration. Default arguments are frequently used for
+constructors but can be useful for all kinds of functions. You can only define default arguments for trailing parameters.
+
+7. How do you add functions together?
+double sloping_cos(double x) { return cos(x)+slope(x); }
+[](double x) { return cos(x)+slope(x); }
+
+8. How do you color and label a graphed function?
+set_color for function object, Text object for label.
+
+9. What do we mean when we say that a series approximates a function?
+The more terms of this sequence we calculate, the more precise our value of ex becomes; that is, the more terms we calculate,
+the more digits of the result will be mathematically correct.
+approximation something (e.g., a value or a design) that is close to the perfect or ideal (value or design). Often an
+approximation is a result of trade-offs among ideals.
+
+10. Why would you sketch out the layout of a graph before writing the code to draw it?
+14. How do you plan the general layout of a graph? How do you reflect that layout in your code?
+Getting graphing code both correct and good-looking can be surprisingly tricky. The main reason is that we have to do a lot
+of fiddly calculations of sizes and offsets. To simplify that, we start by defining a set of symbolic constants that defines the way
+we use our screen space.
+We find that without a “schematic view” of where things are in our window and the symbolic constants that define it, we
+get lost and become frustrated when our output doesn’t reflect our wishes.
+
+11. How would you scale your graph so that the input will fit?
+Devide the length of axis by number of needed notches to find scaling factor.
+
+12. How would you scale the input without trial and error?
+We define a little class to do the calculation for us. We want a class because the calculation can depend on several constant values that we wouldn’t like to unnecessarily repeat.
+The use of objects of such class makes scaling and placement of the data trivial. “Little classes,” such as Scale, can be immensely
+important for simplifying notation and avoiding unnecessary repetition — thereby increasing readability and increasing the
+likelihood of correctness.
+
+13. Why would you format your input rather than just having the file contain “the numbers”?
+Defining a type to hold a data item and an input operator to read such data items simplifies the code compared to a brute-force
+approach of “just read the numbers and graph them.”
+Our use of such type splits the code up into logical parts to help
+comprehension and debugging. Don’t be shy about introducing types “just to make the code clearer.” We define classes to make
+the code correspond more directly to the way we think about the concepts in our code. Doing so even for “small” concepts that
+are used only very locally in our code, such as a line of data representing the age distribution for a year, can be most helpful.
