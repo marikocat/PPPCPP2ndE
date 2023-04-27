@@ -1,0 +1,87 @@
+1. Why would you want a graphical user interface?
+Every program has a user interface. We use a graphical user interface when we want our user interaction to be based on the
+metaphor of manipulating objects on the screen (pointing, clicking, dragging and dropping, hovering, etc.). Often (but not
+always), that style goes together with a high degree of graphically displayed information. Anyone who has used a modern
+computer knows examples where that is convenient. Anyone who wants to match the “feel” of Windows/Mac
+applications must use a GUI style of interaction.
+
+2. When would you want a non-graphical user interface?
+Console input and output is a strong contender for technical/professional work where the input is simple and
+textual, consisting of commands and short data items (such as file names and simple data values). If the output is textual,
+we can display it on the screen or store it in files. The C++ standard library iostreams provide
+suitable and convenient mechanisms for this. If graphical output is needed, we can use a graphics display library 
+without making dramatic changes to our programming style.
+
+3. What is a software layer?
+Our program runs on top of several “layers” of code.
+Our program -> Our graphics/GUI interface library -> FLTK -> The operating system graphics/GUI facilities -> Device driver layer
+It uses our graphics library that we implement using the FLTK library,
+which is implemented using operating system facilities. In a system, there may be even more layers and sub-layers.
+
+4. Why would you want to layer software?
+We prefer to have a clean interfaces between different layers so programs can be ported to different platforms on computers with different hardware, also such a separation allows us to port our programs to use different I/O systems.
+
+5. What is the fundamental problem when communicating with an operating system from C++?
+The GUI system (and the operating system) can be used by programs written in a variety of languages, so it cannot impose
+some nice C++ style on all users. In particular, it does not know about our Simple_window class or our Button class. In
+fact, it doesn’t know about classes or member functions at all. The type required for a callback function is chosen so that it is
+usable from the lowest level of programming, including C and assembler. A callback function returns no value and takes two
+addresses as its arguments.
+
+6. What is a callback?
+This is the function that we want the GUI system to call when it
+detects a click on our button for ex. Since we give the function to the GUI for the GUI to “call back to us,” it’s commonly called a
+callback function.
+Whenever we want a callback (from “the system”) to one of our windows, we define a pair of functions: first to get us out of the low-level system-dependent part of the system and second to perform our desired action.
+
+7. What is a widget?
+8. What is another name for widget?
+Basically, anything that appears on a screen with an action (e.g., a callback) associated is a Widget.
+Yes, widget really is a technical term. A more descriptive, but less evocative, name for a widget is a control. We use widgets
+to define forms of interaction with a program through a GUI (graphical user interface).
+
+9. What does the acronym FLTK mean?
+Fast Light Tool Kit
+
+10. How do you pronounce FLTK?
+“full tick”.
+
+11. What other GUI toolkits have you heard of?
+SFML
+
+12. Which systems use the term widget and which prefer control?
+Both terms can be used interchangeably.
+
+13. What are examples of widgets?
+Button, Menu, In_box, Out_box
+
+14. When would you use an inbox?
+To get text input from user.
+
+15. What is the type of the value stored in an inbox?
+int or string
+
+16. When would you use a button?
+A Button is the simplest Widget we deal with. All it does is to invoke a callback when we click on it.
+
+17. When would you use a menu?
+To have collection of buttons.
+
+18. What is control inversion?
+What happened was that we moved the control of the order of execution from the program to the widgets: whichever widget the
+user activates, runs. For example, click on a button and its callback runs. When that callback returns, the program settles back,
+waiting for the user to do something else. Basically, wait() tells “the system” to look out for the widgets and invoke the
+appropriate callbacks.
+
+19. What is the basic strategy for debugging a GUI program?
+To minimize hassle, it is essential to keep the GUI portion of a
+program simple and to build a GUI program incrementally, testing at each stage. When working on a GUI program, it is almost
+essential to draw little diagrams of the objects and their interactions.
+
+20. Why is debugging a GUI program harder than debugging an “ordinary program using streams for I/O”?
+One implication of this “control inversion” is that the order of execution is completely determined by the actions of the user.
+This complicates both program organization and debugging. It is hard to imagine what a user will do and hard to imagine every
+possible effect of a random sequence of callbacks. This makes systematic testing a nightmare (see Chapter 26). The techniques
+for dealing with that are beyond the scope of this book, but we encourage you to be extra careful with code driven by users
+through callbacks. In addition to the obvious control flow problems, there are also problems of visibility and difficulties with
+keeping track of which widget is connected to what data.
