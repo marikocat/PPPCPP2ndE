@@ -1,0 +1,153 @@
+1. Why do we need data structures with varying numbers of elements?
+Operations that change the number of elements of a vector for ex., such as push_back(), can’t be
+implemented if we defined vector to have a fixed number of elements.
+
+2. What four kinds of storage do we have for a typical program?
+When you start a C++ program, the compiler sets aside memory for your
+code (sometimes called code storage or text storage) and for the global variables you define (called static storage). It also
+sets aside some memory to be used when you call functions, and they need space for their arguments and local variables (that’s
+called stack storage or automatic storage). The rest of the computer’s memory is potentially available for other uses; it is
+“free” (free store).
+
+3. What is the free store? What other name is commonly used for it? What operators support it?
+Heap storage. The C++ language makes this “free store” (also called the heap) available through an operator called new.
+
+4. What is a dereference operator and why do we need one?
+If we want to see the value of the object pointed to, we can do that using the “contents of” operator, unary *.
+The contents of operator (often called the dereference operator) can also be used on the left-hand side of an assignment.
+
+5. What is an address? How are memory addresses manipulated in C++?
+A computer’s memory is a sequence of bytes. We can number the bytes from 0 to the last one. We call such “a number that
+indicates a location in memory” an address. You can think of an address as a kind of integer value. The first byte of memory
+has the address 0, the next the address 1, and so on.
+We can store and manipulate addresses. An object that holds an address value is called a pointer.
+Note that even though a pointer value can be printed as an integer, a pointer is not an integer.
+A pointer type provides the operations suitable for addresses.
+
+6. What information about a pointed-to object does a pointer have? What useful information does it lack?
+In C++, a data type that can hold an address is called a pointer and is syntactically
+distinguished by the suffix *, so that double* means “pointer to double.”
+So a pointer has an address and type of a pointed-to object.
+• A pointer value is the address of the first byte of the memory.
+• A pointer points to an object of a specified type.
+The major problem with pointers is that a pointer doesn’t “know” how many elements it points to.
+
+7. What can a pointer point to?
+Each type has a corresponding pointer type.
+The notion of “pointer” is general, so we can point to just about anything we can place in memory.
+
+8. What is a leak?
+The new operator allocates (“gets”) memory from the free store. Since a computer’s memory is limited, it is usually a good
+idea to return memory to the free store once we are finished using it. That way, the free store can reuse that memory for a new
+allocation. For large programs and for long-running programs such freeing of memory for reuse is essential.
+If allocated memory wasn't freed it is called memory leak.
+When is it important not to leak memory? A program that needs to run “forever” can’t afford any memory leaks. An operating
+system is an example of a program that “runs forever,” and so are most embedded systems. A library should
+not leak memory because someone might use it as part of a system that shouldn’t leak memory. In general, it is simply a good
+idea not to leak.
+Many programmers consider leaks as proof of sloppiness. However, that’s slightly overstating the point. When
+you run a program under an operating system (Unix, Windows, whatever), all memory is automatically returned to the system at
+the end of the program. It follows that if you know that your program will not use more memory than is available, you might
+reasonably decide to “leak” until the operating system does the deallocation for you. However, if you decide to do that, be sure
+that your memory consumption estimate is correct, or people will have good reason to consider you sloppy.
+
+9. What is a resource?
+Destructors are great for handling resources that we
+need to first acquire (from somewhere) and later give back: files, threads, locks, etc. Remember how iostreams clean up after
+themselves? They flush buffers, close files, free buffer space, etc. That’s done by their destructors. Every class that “owns” a
+resource needs a destructor.
+• Whatever resources a class object needs to function, it acquires in a constructor.
+• During the object’s lifetime it may release resources and acquire new ones.
+• At the end of the object’s lifetime, the destructor releases all resources still owned by the object.
+
+10. How can we initialize a pointer?
+With address of a pointed-to object using address of operator (&),
+with the pointer returned by new operator after we allocated memory on the free store with it.
+If you have no other pointer to use for initializing a pointer, use the null pointer, nullptr.
+
+11. What is a null pointer? When do we need to use one?
+If you have no other pointer to use for initializing a pointer, use the null pointer, nullptr.
+When assigned to a pointer, the value zero is called the null pointer, and often we test whether a pointer is valid (i.e., whether
+it points to something) by checking whether it is nullptr.
+We need to use the null pointer when we have a pointer that sometimes points to an object and sometimes not. That’s rarer
+than many people think; consider: If you don’t have an object for a pointer to point to, why did you define that pointer?
+Couldn’t you wait until you have an object?
+The name nullptr for the null pointer is new in C++11, so in older code, people often use 0 (zero) or NULL instead of
+nullptr. Both older alternatives can lead to confusion and/or errors, so prefer the more specific nullptr.
+
+12. When do we need a pointer (instead of a reference or a named object)?
+There is no way to get a reference to refer to a different object
+after initialization. If you need to point to something different, use a pointer.
+When you want to change the value of a variable to a value computed by a function, you have three choices.
+// compute a new value and return it
+// pass a pointer
+// pass a reference
+We think returning the value often leads to the most obvious (and therefore least error-prone) code.
+We prefer that style for small objects, such as an int. In addition, if a “large object” has a move constructor we can
+efficiently pass it back and forth.
+How do we choose between using a reference argument and using a pointer argument? Unfortunately, either way has both
+attractions and problems, so again the answer is less than clear-cut. You have to make a decision based on the individual
+function and its likely uses.
+Using a pointer argument alerts the programmer that something might be changed.
+The need to use & in f(&x) alerts the user that x might be changed. In contrast, f(x) “looks innocent.” This leads to
+a slight preference for the pointer version.
+On the other hand, if you use a pointer as a function argument, the function has to beware that someone might call it with a
+null pointer, that is, with a nullptr.
+In contrast, users of a reference are entitled to assume that a reference refers to an object.
+If “passing nothing” (passing no object) is acceptable from the point of view of the semantics of the function, we must use a
+pointer argument. Note: That’s not the case for an increment operation — hence the need for throwing an exception for
+p==nullptr.
+So, the real answer is: “The choice depends on the nature of the function”:
+• For tiny objects prefer pass-by-value.
+• For functions where “no object” (represented by nullptr) is a valid argument use a pointer parameter (and remember to
+test for nullptr).
+• Otherwise, use a reference parameter.
+
+13. What is a destructor? When do we want one?
+The basic idea is to
+have the compiler know about a function that does the opposite of a constructor, just as it knows about the constructor.
+Inevitably, such a function is called a destructor. In the same way that a constructor is implicitly called when an object of a
+class is created, a destructor is implicitly called when an object goes out of scope. A constructor makes sure that an object is
+properly created and initialized. Conversely, a destructor makes sure that an object is properly cleaned up before it is
+destroyed.
+
+14. When do we want a virtual destructor?
+As a rule of thumb: if you have a class with a virtual function, it needs a virtual destructor. The reason is:
+1. If a class has a virtual function it is likely to be used as a base class, and
+2. If it is a base class its derived class is likely to be allocated using new, and
+3. If a derived class object is allocated using new and manipulated through a pointer to its base, then
+4. It is likely to be deleted through a pointer to its base
+
+15. How are destructors for members called?
+If a member of a class has a destructor, then that destructor will be called when the object containing the member is destroyed.
+“The compiler generated a
+destructor for the object, which calls the members’ destructors.”
+The destructors for members — and for bases — are implicitly called from a derived class destructor (whether user-defined
+or generated). Basically, all the rules add up to: “Destructors are called when the object is destroyed” (by going out of scope,
+by delete, etc.).
+
+16. What is a cast? When do we need to use one?
+Explicit type conversion.
+A static_cast can be used to explicitly convert between related pointer types, such as void* and double* (§A.5.7). The
+name static_cast is a deliberately ugly name for an ugly (and dangerous) operation — use it only when absolutely necessary.
+You shouldn’t find it necessary very often — if at all. An operation such as static_cast is called an explicit type conversion
+(because that’s what it does) or colloquially a cast (because it is used to support something that’s broken).
+C++ offers two casts that are potentially even nastier than static_cast:
+• reinterpret_cast can cast between unrelated types, such as int and double*.
+• const_cast can “cast away const.”
+
+17. How do we access a member of a class through a pointer?
+All classes support the operator –> (arrow) for accessing members, given a pointer to an object.
+Like . (dot), –> (arrow) can be used for both data members and function members. Since built-in types, such as int and
+double, have no members, –> doesn’t apply to built-in types. Dot and arrow are often called member access operators.
+
+18. What is a doubly-linked list?
+Lists are among the most common and useful data structures.
+A list is called a doubly-linked list when given a link, we can find both the predecessor and the successor. A list
+where we can find only the successor is called a singly-linked list. We use doubly-linked lists when we want to make it easy
+to remove an element.
+
+19. What is this and when do we need to use it?
+If we need to get a pointer to the object for which member function was called, we can do that with the help from the language. In every member function, the identifier this is a pointer that points to the object for which the member function was called.
+this has a specific meaning: it points to the object for which a member function is called. It does not point to any
+old object. The compiler ensures that we do not change the value of this in a member function.
