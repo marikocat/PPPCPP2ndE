@@ -1,0 +1,169 @@
+1. What does “Caveat emptor!” mean?
+The principle that the buyer alone is responsible for checking the quality and suitability of goods before a purchase is made.
+
+2. What is the default meaning of copying for class objects?
+The default meaning of copying for a class is “Copy all the data members.”
+
+3. When is the default meaning of copying of class objects appropriate? When is it inappropriate?
+For example, we
+copy a Point by copying its coordinates. But for a pointer member, just copying the members causes problems. In particular,
+for the vectors in our example, it means that after the copy, we have v.sz==v2.sz and v.elem==v2.elem so that our
+pointers start to point to the same memory region.
+That is, v2 doesn’t have a copy of v’s elements; it shares v’s elements.
+Also, what happens when we return from f() (function for which both v and v2 are local) is an unmitigated disaster. Then, the destructors for v and v2 are implicitly called;
+v’s destructor frees the storage used for the elements using
+delete[] elem;
+and so does v2’s destructor. Since elem points to the same memory location in both v and v2, that memory will be freed twice
+with likely disastrous results.
+
+4. What is a copy constructor?
+When we need to provide a copy operation that copies the elements of the object and make sure that this copy
+operation gets called when we initialize one object with another, we use copy constructor.
+Initialization of objects of a class is done by a constructor. So, we need a constructor that copies. Unsurprisingly, such a
+constructor is called a copy constructor. It is defined to take as its argument a reference to the object from which to copy.
+So,for class vector we need:
+vector(const vector&);
+This constructor will be called when we try to initialize one vector with another. We pass by reference because we
+(obviously) don’t want to copy the argument of the constructor that defines copying. We pass by const reference because we
+don’t want to modify our argument.
+The copy constructor sets the number of elements (sz) and allocates memory for the elements (initializing elem) before
+copying element values from the argument vector.
+
+5. What is a copy assignment?
+As with copy initialization, the
+default meaning of copy assignment is memberwise copy.
+We need to define an assignment (operator=) that copies properly.
+Our basic strategy is to
+make a copy of the elements from the source.
+Then we free the old elements from the target.
+Finally, we let member pointer point to the new elements.
+
+6. What is the difference between copy assignment and copy initialization?
+Assignment is a bit more complicated than construction because we must deal with the old elements.
+
+7. What is shallow copy? What is deep copy?
+The basic issue is whether you copy a pointer (or
+reference) or copy the information pointed to (referred to):
+• Shallow copy copies only a pointer so that the two pointers now refer to the same object. That’s what pointers and
+references do.
+• Deep copy copies what a pointer points to so that the two pointers now refer to distinct objects. That’s what vectors,
+strings, etc. do. We define copy constructors and copy assignments when we want deep copy for objects of our classes.
+
+8. How does the copy of a vector compare to its source?
+The standard library vector does a deep copy
+by allocating new space for the elements and copying their values.
+
+9. What are the five “essential operations” for a class?
+The five essential operations that must be considered for every type:
+construction, default construction, copy construction, copy assignment, and destruction.
+
+10. What is an explicit constructor? Where would you prefer one over the (default) alternative?
+A constructor that takes a single argument defines a conversion from its argument type to its class.
+However, implicit conversions should be used sparingly and with caution, because they can cause unexpected and undesirable
+effects. For example, our vector, as defined so far, has a constructor that takes an int. This implies that it defines a conversion
+from int to vector.
+class vector {
+// . . .
+vector(int);
+// . . .
+};
+vector v = 10; // odd: makes a vector of 10 doubles
+v = 20; // eh? Assigns a new vector of 20 doubles to v
+void f(const vector&);
+f(10); // eh? Calls f with a new vector of 10 doubles
+It seems we are getting more than we have bargained for. Fortunately, it is simple to suppress this use of a constructor as an
+implicit conversion. A constructor-defined explicit provides only the usual construction semantics and not the implicit
+conversions.
+class vector {
+// . . .
+explicit vector(int);
+// . . .
+};
+vector v = 10; // error: no int-to-vector conversion
+v = 20; // error: no int-to-vector conversion
+vector v0(10); // OK
+void f(const vector&);
+f(10); // error: no int-to-vector<double> conversion
+f(vector(10)); // OK
+To avoid surprising conversions, we — and the standard — define vector’s single-argument constructors to be explicit.
+
+11. What operations may be invoked implicitly for a class object?
+Constructors, assignment operations, and destructors.
+Constructors and destructors are invoked at well-defined and predictable points of a program’s execution. However, we don’t
+always write explicit calls, such as vector(2); rather we do something, such as declaring a vector, passing a vector as a byvalue
+argument, or creating a vector on the free store using new. This can cause confusion for people who think in terms of
+syntax. There is not just a single syntax that triggers a constructor. It is simpler to think of constructors and destructors this way:
+• Whenever an object of type X is created, one of X’s constructors is invoked.
+• Whenever an object of type X is destroyed, X’s destructor is invoked.
+A destructor is called whenever an object of its class is destroyed; that happens when names go out of scope, the program
+terminates, or delete is used on a pointer to an object. A constructor (some appropriate constructor) is invoked whenever an
+object of its class is created; that happens when a variable is initialized, when an object is created using new (except for
+built-in types), and whenever an object is copied.
+
+12. What is an array?
+An array is a homogeneous sequence of
+objects allocated in contiguous memory; that is, all elements of an array have the same type and there are no gaps between the
+objects of the sequence.
+
+13. How do you copy an array?
+As a consequence of this implicit array-name-to-pointer conversion, you can’t even copy arrays using assignment:
+int x[100];
+int y[100];
+// . . .
+x = y; // error
+int z[100] = y; // error
+This is consistent, but often a bother. If you need to copy an array, you must write some more elaborate code to do so. For
+example:
+for (int i=0; i<100; ++i) x[i]=y[i]; // copy 100 ints
+memcpy(x,y,100*sizeof(int)); // copy 100*sizeof(int) bytes
+copy(y,y+100, x); // copy 100 ints
+
+14. How do you initialize an array?
+An array of chars can be initialized with a string literal.
+char ac[] = "Beorn";
+ac becomes an array of six characters because the compiler adds a terminating zero
+character at the end of a string literal.
+Only character arrays can be initialized by literal strings, but all arrays can be initialized by a list of values of their element
+type.
+int ai[] = { 1, 2, 3, 4, 5, 6 }; // array of 6 ints
+int ai2[100] = {0,1,2,3,4,5,6,7,8,9}; // the last 90 elements are initialized to 0
+double ad[100] = { }; // all elements initialized to 0.0
+char chars[]= {'a', 'b', 'c'}; // no terminating 0!
+Note that the number of elements of ai is six (not seven) and the number of elements for chars is three (not four) — the “add a
+0 at the end” rule is for literal character strings only. If an array isn’t given a size, that size is deduced from the initializer list.
+That’s a rather useful feature. If there are fewer initializer values than array elements (as in the definitions of ai2 and ad), the
+remaining elements are initialized by the element type’s default value.
+
+15. When should you prefer a pointer argument over a reference argument? Why?
+How do we choose between using a reference argument and using a pointer argument? Unfortunately, either way has both
+attractions and problems, so again the answer is less than clear-cut. You have to make a decision based on the individual
+function and its likely uses.
+Using a pointer argument alerts the programmer that something might be changed. For example:
+void incr_p(int* p) { ++*p; } // pass a pointer
+void incr_r(int& r) { ++r; } // pass a reference
+int x = 7;
+incr_p(&x) // the & is needed
+incr_r(x);
+The need to use & in incr_p(&x) alerts the user that x might be changed. In contrast, incr_r(x) “looks innocent.” This leads to
+a slight preference for the pointer version.
+On the other hand, if you use a pointer as a function argument, the function has to beware that someone might call it with a
+null pointer, that is, with a nullptr. In contrast, users of a reference (such as incr_r()) are entitled to assume that a reference refers to an object.
+If “passing nothing” (passing no object) is acceptable from the point of view of the semantics of the function, we must use a
+pointer argument. Note: That’s not the case for an increment operation — hence the need for throwing an exception for
+p==nullptr.
+“The choice depends on the nature of the function”:
+• For tiny objects prefer pass-by-value.
+• For functions where “no object” (represented by nullptr) is a valid argument use a pointer parameter (and remember to
+test for nullptr).
+• Otherwise, use a reference parameter.
+
+16. What is a C-style string?
+A zero-terminated array of characters. All string literals are C-style strings.
+
+17. What is a palindrome?
+A palindrome is a word that is spelled the same from both ends. For
+example, anna, petep, and malayalam are palindromes, whereas ida and homesick are not. There are two basic ways of
+determining whether a word is a palindrome:
+• Make a copy of the letters in reverse order and compare that copy to the original.
+• See if the first letter is the same as the last, then see if the second letter is the same as the second to last, and keep going
+until you reach the middle.
