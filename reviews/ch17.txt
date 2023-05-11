@@ -52,6 +52,13 @@ reasonably decide to “leak” until the operating system does the deallocation
 that your memory consumption estimate is correct, or people will have good reason to consider you sloppy.
 
 9. What is a resource?
+A resource is something you “get from somewhere” and that you must
+give back once you have finished using it. The obvious example is memory that you get from the free store (using new) and
+have to give back to the free store (using delete or delete[]).
+Other resources that you might encounter as your programs increase in
+ambition and sophistication are files (if you open one, you also have to close it), locks, thread handles, and sockets (for
+communication with processes and remote computers).
+
 Destructors are great for handling resources that we
 need to first acquire (from somewhere) and later give back: files, threads, locks, etc. Remember how iostreams clean up after
 themselves? They flush buffers, close files, free buffer space, etc. That’s done by their destructors. Every class that “owns” a
