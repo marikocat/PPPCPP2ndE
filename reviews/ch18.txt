@@ -156,6 +156,7 @@ p==nullptr.
 • For functions where “no object” (represented by nullptr) is a valid argument use a pointer parameter (and remember to
 test for nullptr).
 • Otherwise, use a reference parameter.
+Using references and using exceptions to signal errors are the main tools for avoiding null pointers.
 
 16. What is a C-style string?
 A zero-terminated array of characters. All string literals are C-style strings.
