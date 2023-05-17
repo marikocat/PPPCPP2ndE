@@ -43,11 +43,11 @@ istream& read_long_string(istream& is, char*& buffer)
 		if (ch == '\n') break;
 		if (i == limit - 1)
 		{
-			char* temp = buffer;
 			limit *= 2;
-			buffer = new char[limit];
-			copy(temp, &temp[limit / 2 - 1], buffer);
-			delete[] temp;
+			char* temp = new char[limit];
+			copy(buffer, &buffer[limit / 2 - 1], temp);
+			delete[] buffer;
+			buffer = temp;
 		}
 		buffer[i] = ch;
 	}
