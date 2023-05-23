@@ -121,7 +121,7 @@ T& vector<T, A>::operator[](int n)
 template<typename T, typename A> void vector<T, A>::resize(int newsize, T val)
 {
 	reserve(newsize);
-	for (int i = 0; i < newsize; ++i) alloc.construct(&elem[i], val);
+	for (int i = sz; i < newsize; ++i) alloc.construct(&elem[i], val);
 	for (int i = newsize; i < sz; ++i) alloc.destroy(&elem[i]);
 	sz = newsize;
 }
