@@ -1,0 +1,178 @@
+1. Why would we want to change the size of a vector?
+Obviously, not all containers have the same number of elements. Could we live with a vector that had its size fixed by its
+initial definition; that is, could we write our code without push_back(), resize(), and equivalent operations? Sure we could,
+but that would put an unnecessary burden on the programmer: the basic trick for living with fixed-size containers is to move the
+elements to a bigger container when the number of elements grows too large for the initial size.
+One of the reasons to use containers, such as vector, is to do better than that; that is, we want vector to handle such size changes
+internally to save us — its users — the bother and the chance to make mistakes. In other words, we prefer containers that can
+grow to hold the exact number of elements we happen to need.
+Are such changes of size common? If they are not, facilities for changing size are simply minor conveniences. However, such
+size changes are very common. The most obvious example is reading an unknown number of values from input. Other examples
+are collecting a set of results from a search (we don’t in advance know how many results there will be) and removing elements
+from a collection one by one. Thus, the question is not whether we should handle size changes for containers, but how.
+
+2. Why would we want to have different element types for different vectors?
+Obviously, not all vectors have the same type of elements. We need vectors of doubles, temperature readings, records (of
+various kinds), strings, operations, GUI buttons, shapes, dates, pointers to windows, etc. The possibilities are endless.
+
+3. Why don’t we just always define a vector with a large enough size for all eventualities?
+Why do we bother with changing sizes at all? Why not “just allocate enough space and be done with it!”? That appears to be
+the simplest and most efficient strategy. However, it is that only if we can reliably allocate enough space without allocating
+grossly too much space — and we can’t. People who try that tend to have to rewrite code (if they carefully and systematically
+checked for overflows) and deal with disasters (if they were careless with their checking).
+
+4. How much spare space do we allocate for a new vector?
+We need to allocate enough memory for vector's representation (its data members).
+In fact, all vector implementations keep track of both the number of elements and an amount of “free space” reserved for “future expansion.”
+The default constructor (creating a vector with no elements) sets the integer members size and space (number of elements and number of elements plus “free space”/“slots”) to 0 and the pointer member elem (address of first element) to nullptr.
+The default constructor does no free-store allocation and occupies minimal storage.
+When a vector is first constructed, space==sz; that is, there is no “free space”.
+We don’t start allocating extra slots until we begin changing the number of elements. Typically, space==sz, so there is no
+memory overhead unless we use push_back().
+Memory for elements of a vector are allocated on free-store when the constructor with a number of elements argument gets called or when we change size of a vector.
+
+5. When must we copy vector elements to a new location?
+We must copy old vector elements to a new location when its size (number of elements) changes and gets greater than capacity of vector.
+The most fundamental operation when we change sizes (that is, when we change the number of elements) is vector::reserve(). 
+That’s the operation we use to add space for new elements.
+In reserve() if new size is greater than already allocated space we need to allocate new space and copy old elements there, and dealocate old space.
+Note that we don’t initialize the elements of the reserved space (remaining free slots). After all, we are just reserving space; using that space for
+elements is the job of push_back() and resize().
+For a vector called v, v.capacity()–v.size() is the number of elements we could push_back() to v without causing
+reallocation and subsequent copying to a new location.
+
+6. Which vector operations can change the size of a vector after construction?
+What facilities for changing size does the standard library vector offer? It provides three simple operations.
+resize(), push_back() and copy assignment. 
+The standard library vector offers more operations that can change a vector’s size, such as erase() and insert().
+
+7. What is the value of a vector after a copy?
+We could have defined vector assignment in several different ways. For example, we could have decided that assignment was
+legal only if the two vectors involved had the same number of elements. However, we decided that vector
+assignment should have the most general and arguably the most obvious meaning: after assignment v1=v2, the vector v1 is a
+copy of v2.
+Obviously, we need to copy the elements, but what about the spare space? Do we “copy” the “free space” at the end? We
+don’t: the new vector will get a copy of the elements, but since we have no idea how that new vector is going to be used, we
+don’t bother with extra space at the end.
+
+8. Which two operations define copy for vector?
+Copy constructor and copy assignment.
+
+9. What is the default meaning of copy for class objects?
+The default meaning of copying for a class is “Copy all the data members” (shallow, memberwise copy).
+
+10. What is a template?
+Basically, a template is a mechanism that allows a programmer to use types as parameters for a class or a function. The
+compiler then generates a specific class or function when we later provide specific types as arguments.
+template - a class or a function parameterized by one or more types or (compile-time) values; the basic C++ language
+construct supporting generic programming.
+
+11. What are the two most useful types of template arguments?
+Obviously, it is useful to parameterize classes with types. How about parameterizing classes with “other things,” such as
+integer values and string values? Basically, any kind of argument can be useful, but we’ll consider only type and integer
+parameters. Other kinds of parameters are less frequently useful, and C++’s support for other kinds of parameters is such that
+their use requires quite detailed knowledge of language features.
+
+12. What is generic programming?
+Templates are the basis for generic programming in C++. In fact, the simplest definition of “generic programming” in C++ is
+“using templates.” That definition is a bit too simpleminded, though. We should not define fundamental programming concepts
+in terms of programming language features. Programming language features exist to support programming techniques — not the
+other way around. As with most popular notions, there are many definitions of “generic programming.” We think that the most
+useful simple definition is
+Generic programming: Writing code that works with a variety of types presented as arguments, as long as those argument
+types meet specific syntactic and semantic requirements.
+
+13. How does generic programming differ from object-oriented programming?
+Generic programming is sometimes referred to as “algorithm-oriented programming”; the focus of
+the design is more the algorithms than the data types they use.
+This form of generic programming relying on explicit template parameters is often called parametric polymorphism. In
+contrast, the polymorphism you get from using class hierarchies and virtual functions is called ad hoc polymorphism and that
+style of programming is called object-oriented programming. The reason that both styles of programming are called
+polymorphism is that each style relies on the programmer to present many versions of a concept by a single interface.
+Polymorphism is Greek for “many shapes,” referring to the many different types you can manipulate through a common
+interface.
+There are several differences between object-oriented programming (using class hierarchies and virtual functions) and
+generic programming (using templates). The most obvious is that the choice of function invoked when you use generic
+programming is determined by the compiler at compile time, whereas for object-oriented programming, it is not determined
+until run time.
+For example:
+v.push_back(x); // put x into the vector v
+s.draw(); // draw the shape s
+For v.push_back(x) the compiler will determine the element type for v and use the appropriate push_back(), but for
+s.draw() the compiler will indirectly call some draw() function (using s’s vtbl). This gives object-oriented
+programming a degree of freedom that generic programming lacks, but leaves run-of-the-mill generic programming more
+regular, easier to understand, and better performing (hence the “ad hoc” and “parametric” labels).
+To sum up:
+• Generic programming: supported by templates, relying on compile-time resolution
+• Object-oriented programming: supported by class hierarchies and virtual functions, relying on run-time resolution
+Combinations of the two are possible and useful. For example:
+void draw_all(vector<Shape*>& v)
+{
+for (int I = 0; i<v.size(); ++i) v[i]–>draw();
+}
+Here we call a virtual function (draw()) on a base class (Shape) using a virtual function — that’s certainly object-oriented
+programming. However, we also kept Shape*s in a vector, which is a parameterized type, so we also used (simple) generic
+programming.
+
+14. How does array differ from vector?
+An example of the most common use of an integer value as a template argument is an array - a container where the number of
+elements is known at compile time.
+Clearly, array is very simple — much simpler and less powerful than vector — so why would anyone want to use an array
+rather than a vector? One answer is “efficiency.” We know the size of an array at compile time, so the compiler can allocate
+static memory (for global objects, such as gb) and stack memory (for local objects, such as loc) rather than using the free
+store. When we do range checking, the checks can be against constants (the size parameter N). For most programs the
+efficiency improvement is insignificant, but if you are writing a crucial system component, such as a network driver, even a
+small difference can matter. More importantly, some programs simply can’t be allowed to use the free store. Such programs
+are typically embedded systems programs and/or safety-critical programs. In such programs, array gives us
+many of the advantages of vector without violating a critical restriction (no free-store use).
+
+15. How does array differ from the built-in array?
+Let’s ask the opposite question: not “Why can’t we just use vector?” but “Why not just use built-in arrays?” As we saw in
+§18.6, arrays can be rather ill behaved: they don’t know their own size, they convert to pointers at the slightest provocation,
+they don’t copy properly.
+
+16. How does resize() differ from reserve()?
+reserve() allocates uninitialized memory and constructs copies of old elements, then destroys old elements and deallocate their space, meanwhile resize() changes size of vector constructing new default elements in case we are resizing to a larger vector and destroyes surplus elements in case we are resizing to a smaller vector.
+
+17. What is a resource? Define and give examples.
+One of the fundamental principles of programming is that if we acquire a resource, we must — somehow, directly or
+indirectly — return it to whatever part of the system manages that resource. Examples of resources are
+• Memory
+• Locks
+• File handles
+• Thread handles
+• Sockets
+• Windows
+Basically, we define a resource as something that is acquired and must be given back (released) or reclaimed by some
+“resource manager.”
+
+18. What is a resource leak?
+A resource that was aquired and after usage wasn't returned to whatever part of the system manages that resource.
+When is it important not to leak memory? A program that needs to run “forever” can’t afford any memory leaks. An operating
+system is an example of a program that “runs forever,” and so are most embedded systems (see Chapter 25). A library should
+not leak memory because someone might use it as part of a system that shouldn’t leak memory. In general, it is simply a good
+idea not to leak. Many programmers consider leaks as proof of sloppiness. However, that’s slightly overstating the point. When
+you run a program under an operating system (Unix, Windows, whatever), all memory is automatically returned to the system at
+the end of the program. It follows that if you know that your program will not use more memory than is available, you might
+reasonably decide to “leak” until the operating system does the deallocation for you. However, if you decide to do that, be sure
+that your memory consumption estimate is correct, or people will have good reason to consider you sloppy.
+
+19. What is RAII? What problem does it address?
+The solution is general; it applies to all kinds of resources: acquire a resource in the constructor for
+some object that manages it, and release it again in the matching destructor. Examples of resources that are usually best dealt
+with in this way include database locks, sockets, and I/O buffers (iostreams do it for you). This technique is usually referred
+to by the awkward phrase “Resource Acquisition Is Initialization,” abbreviated to RAII.
+This general rule holds: when the thread of execution leaves a scope, the destructors for every
+fully constructed object and sub-object are invoked. An object is considered constructed when its constructor completes.
+Exploring the detailed implications of those two statements might cause a headache, but they simply mean that constructors and
+destructors are invoked as needed.
+
+20. What is unique_ptr good for?
+A unique_ptr is an object that holds a pointer.
+unique_ptr<vector<int>> p {new vector<int>};
+The unique_ptr owns the object pointed to: when the unique_ptr is destroyed, it deletes the object it
+points to. That means that if an exception is thrown while the vector<int> is being filled, or if we return prematurely from
+make_vec, the vector<int> is properly destroyed. The p.release() extracts the contained pointer (to the vector<int>)
+from p so that we can return it, and it also makes p hold the nullptr so that destroying p (as is done by the return) does not
+destroy anything.
+A unique_ptr has the interesting property of having no overhead compared to an ordinary pointer.
