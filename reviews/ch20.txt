@@ -1,0 +1,248 @@
+1. Why does code written by different people look different? Give examples.
+Jack and Jill are each measuring vehicle speeds, which they record as
+floating-point values. Jack was brought up as a C programmer and stores his values in an array, whereas Jill stores hers in a
+vector.
+
+2. What are simple questions we ask of data?
+We don’t have to know the details
+about how the data is stored (or gathered) to talk about what to do with it. What is important is the type of the values or objects
+(the element type), how we access those values or objects, and what we want to do with them.
+
+3. What are a few different ways of storing data?
+Let’s consider a simple example that points to ways of handling a large class of data-processing problems.
+We could have Jack’s and Jill’s programs write out the values to a file and then read them back into our program. That way,
+we are completely insulated from their choices of data structures and interfaces. Often, such isolation is a good idea, and if
+that’s what we decide to do we can use the techniques for input and a vector<double> for our
+calculations.
+But, what if using files isn’t a good option for the task we want to do? Let’s say that the data-gathering code is designed to
+be invoked as a function call to deliver a new set of data every second. Once a second, we call Jack’s and Jill’s functions to
+deliver data for us to process.
+double* get_from_jack(int* count); // Jack puts doubles into an array and returns the number of elements in *count
+vector<double>* get_from_jill(); // Jill fills the vector
+Clearly, this is a somewhat simplified example, but it is not dissimilar to a vast number of real-world problems. If we can
+handle this example elegantly, we can handle a huge number of common programming problems. The fundamental problem here
+is that we don’t control the way in which our “data suppliers” store the data they give us. It’s our job to either work with the
+data in the form in which we get it or to read it and store it the way we like better.
+
+4. What basic operations can we do to a collection of data items?
+Consider a more abstract view of what we do with data:
+• Collect data into containers
+	• Such as vector, list, and array
+• Organize data
+	• For printing
+	• For fast access
+• Retrieve data items
+	• By index (e.g., the 42nd element)
+	• By value (e.g., the first record with the “age field” 7)
+	• By properties (e.g., all records with the “temperature field” >32 and <100)
+• Modify a container
+	• Add data
+	• Remove data
+	• Sort (according to some criteria)
+• Perform simple numeric operations (e.g., multiply all elements by 1.7)
+
+5. What are some ideals for the way we store our data?
+To minimize our programming work, we would like
+• Uniform access to data
+	• Independently of how it is stored
+	• Independently of its type
+• Type-safe access to data
+• Easy traversal of data
+• Compact storage of data
+• Fast
+	• Retrieval of data
+	• Addition of data
+	• Deletion of data
+• Standard versions of the most common algorithms
+• Such as copy, find, search, sort, sum, . . .
+
+6. What is an STL sequence?
+The central concept of the STL is the sequence. From the STL point of view, a collection of data is a sequence. A sequence has
+a beginning and an end. We can traverse a sequence from its beginning to its end, optionally reading or writing the value of
+each element. We identify the beginning and the end of a sequence by a pair of iterators.
+begin and end are iterators; they identify the beginning and the end of the sequence.
+An STL sequence is what is usually
+called “half-open”; that is, the element identified by begin is part of the sequence, but the end iterator points one beyond the
+end of the sequence. The usual mathematical notation for such sequences (ranges) is [begin:end).
+
+7. What is an STL iterator? What operations does it support?
+An iterator is an object that identifies an element of a sequence.
+An iterator is a rather abstract notion:
+• An iterator points to (refers to) an element of a sequence (or one beyond the last element).
+• You can compare two iterators using == and !=.
+• You can refer to the value of the element pointed to by an iterator using the unary * operator (“dereference” or “contents
+of”).
+• You can get an iterator to the next element by using ++.
+
+8. How do you move an iterator to the next element?
+++p - makes iterator p refer to the next element in the sequence or to one beyond the last element.
+
+9. How do you move an iterator to the previous element?
+--p - makes iterator p refer to the previous element in the sequence.
+
+10. What happens if you try to move an iterator past the end of a sequence?
+Clearly, the idea of an iterator is related to the idea of a pointer. In fact, a pointer to an element of an array is an
+iterator. However, many iterators are not just pointers; for example, we could define a range-checked iterator that throws an
+exception if you try to make it point outside its [begin:end) sequence or dereference end. It turns out that we get enormous
+flexibility and generality from having iterator as an abstract notion rather than as a specific type.
+
+11. What kinds of iterators can you move to the previous element?
+bidirectional and random-access iterator.
+
+12. Why is it useful to separate data from algorithms?
+There are two major aspects of computing: the computation and the data. Sometimes we focus on the computation and talk
+about if-statements, loops, functions, error handling, etc. At other times, we focus on the data and talk about arrays, vectors,
+strings, files, etc. However, to get useful work done we need both. A large amount of data is incomprehensible without
+analysis, visualization, and searching for “the interesting bits.” Conversely, we can compute as much as we like, but it’s going
+to be tedious and sterile unless we have some data to tie our computation to something real. Furthermore, the “computation
+part” of our program has to elegantly interact with the “data part.”
+We can describe each of tasks of what to do with data without actually mentioning how the data is stored. Clearly, we must be dealing
+with something like lists, vectors, files, input streams, etc. for these tasks to make sense, but we don’t have to know the details
+about how the data is stored (or gathered) to talk about what to do with it. What is important is the type of the values or objects
+(the element type), how we access those values or objects, and what we want to do with them.
+Naturally, we want to write code performing such tasks simply and efficiently.
+Conversely, the problems for us as programmers are:
+• There is an infinite variation of data types (“kinds of data”).
+• There is a bewildering number of ways to store collections of data elements.
+• There is a huge variety of tasks we’d like to do with collections of data.
+To minimize the effect of these problems, we’d like our code to take advantage of commonalities among types, among the ways
+of storing data, and among our processing tasks. In other words, we want to generalize our code to cope with these kinds of
+variations. We really don’t want to hand-craft each solution from scratch; that would be a tedious waste of time.
+We’d like to organize our code so that we have to write new code only when we want to do something really new and
+different. In particular, we’d like to provide code for common programming tasks so that we don’t have to rewrite our solution
+each time we find a new way of storing the data or find a slightly different way of interpreting the data.
+Iterators are used to connect our code (algorithms) to our data. The writer of the code knows about the iterators (and not
+about the details of how the iterators actually get to the data), and the data provider supplies iterators rather than exposing
+details about how the data is stored to all users. The result is pleasingly simple and offers an important degree of independence
+between algorithms and containers. To quote Alex Stepanov: “The reason STL algorithms and containers work so well
+together is that they don’t know anything about each other.” Instead, both understand about sequences defined by pairs of
+iterators.
+In other words, my algorithms no longer have to know about the bewildering variety of ways of storing and accessing data; they
+just have to know about iterators. Conversely, if I’m a data provider, I no longer have to write code to serve a bewildering
+variety of users; I just have to implement an iterator for my data. At the most basic level, an iterator is defined by just the *,
+++, ==, and != operators. That makes them simple and fast.
+
+13. What is the STL?
+The C++ standard library provides a framework for dealing with data as sequences of elements, called the STL. STL is usually
+said to be an acronym for “standard template library.” The STL is the part of the ISO C++ standard library that provides
+containers (such as vector, list, and map) and generic algorithms (such as sort, find, and accumulate). Thus we can —
+and do — refer to facilities, such as vector, as being part of both “the STL” and “the standard library.”
+The STL framework consists of about ten containers and about 60 algorithms connected by iterators. In
+addition, many organizations and individuals provide containers and algorithms in the style of the STL. The STL is probably
+the currently best-known and most widely used example of generic programming.
+
+14. What is a linked list? How does it fundamentally differ from a vector?
+The elements of the vector are consecutive in memory. That’s not required by STL’s notion of a sequence, and it so happens
+that there are many algorithms where we would like to insert an element in between two existing elements without moving
+those existing elements. The graphical representation of the abstract notion suggests the possibility of inserting elements (and of
+deleting elements) without moving other elements. The STL notion of iterators supports that.
+The data structure most directly suggested by the STL sequence diagram is called a linked list. The arrows in the abstract
+model are usually implemented as pointers.
+
+15. What is a link (in a linked list)?
+A “link” consists of the element and one or more pointers.
+A linked list where a link has just one pointer (to the next link) is called a singly-linked list and a list where a
+link has pointers to both the previous and the next link is called a doubly-linked list.
+
+16. What does insert() do? What does erase() do?
+Insert (add an element) and erase (remove an element).
+
+17. How do you know if a sequence is empty?
+We can test whether a list is empty by comparing begin()
+and end() — in fact, we can test whether any STL sequence is empty by comparing its beginning and end.
+List or other STL container is empty if lst.begin()==lst.end().
+
+18. What operations does an iterator for a list provide?
+Iterators provide *, ++ (both prefix and postfix), ==, and !=
+with the appropriate semantics. The iterators for list also provide –– for moving backward in the sequence; that’s called
+a bidirectional iterator.
+The iterator is central to the definition of an STL list. Iterators are used to identify places for insertion and elements for
+removal (erasure). They are also used for “navigating” through a list rather than using subscripting.
+
+19. How do you iterate over a container using the STL?
+However, we can traverse a standard library vector and list using the simpler range-for-loop.
+This works for both the standard library containers and for “our” vector and list. How? The “trick” is that the range-for-loop
+is defined in terms of begin() and end() functions returning iterators to the first and one beyond the end of our vector
+elements. The range-for-loop is simply “syntactic sugar” for a loop over a sequence using iterators.
+
+20. When would you use a string rather than a vector?
+• vector<Elem>: Can do just about everything, including insert() and erase(). Provides subscripting. List operations,
+such as insert() and erase(), typically involve moving elements (that can be inefficient for large elements and large
+numbers of elements). Can be range checked. The elements are allocated contiguously in memory. A vector is
+expandable (e.g., use push_back()). Elements of a vector are stored (contiguously) in an array. Comparison operators
+(==, !=, <, <=, >, and >=) compare elements.
+• string: Provides all the common and useful operations plus specific text manipulation operations, such as concatenation
+(+ and +=). The elements are guaranteed to be contiguous in memory. A string is expandable. Comparison operators
+(==, !=, <, <=, >, and >=) compare elements.
+In what way is a vector superior to a string? Looking at the lists of their properties, it seems that a string can do all that a
+vector can, and more. That’s part of the problem: since string has to do more things, it is harder to optimize. In fact, vector
+tends to be optimized for “memory operations” such as push_back(), whereas string tends not to be. Instead, string tends to
+be optimized for handling of copying, for dealing with short strings, and for interaction with C-style strings.
+The major
+logical difference is that you can have a vector of just about any element type. We have a choice only when we are thinking
+about characters. In conclusion, prefer vector to string unless you need string operations, such as concatenation or reading
+whitespace-separated words.
+
+21. When would you use a list rather than a vector?
+• vector<Elem>: Can do just about everything, including insert() and erase(). Provides subscripting. List operations,
+such as insert() and erase(), typically involve moving elements (that can be inefficient for large elements and large
+numbers of elements). Can be range checked. The elements are allocated contiguously in memory. A vector is
+expandable (e.g., use push_back()). Elements of a vector are stored (contiguously) in an array. Comparison operators
+(==, !=, <, <=, >, and >=) compare elements.
+• list<Elem>: Provides all the common and usual operations, except subscripting. We can insert() and erase() without
+moving other elements. Needs two words extra (for link pointers) for each element. A list is expandable. Comparison
+operators (==, !=, <, <=, >, and >=) compare elements.
+The standard library vector is our default choice for a container. It has most of the desired features, so we use alternatives
+only if we have to. Its main problem is its habit of moving elements when we do list operations (insert() and erase()); that
+can be costly when we deal with vectors with many elements or vectors of large elements.
+Moving elements also implies a logical constraint: don’t hold iterators or pointers to elements of a
+vector when you do list operations (such as insert(), erase(), and push_back()): if an element moves, your iterator or
+pointer will point to the wrong element or to no element at all. This is the principal advantage of lists (and maps)
+over vectors. If you need a collection of large objects or of objects that you point to from many places in a program, consider
+using a list.
+Avoid (linked) lists for representing a list of a few small elements.
+If in doubt, use vector. Unless you have a solid reason not to, use vector.
+
+22. What is a container?
+An STL container
+• Is a sequence of elements [begin():end()).
+• Provides copy operations that copy elements. Copying can be done with assignment or a copy constructor.
+• Names its element type value_type.
+• Has iterator types called iterator and const_iterator. Iterators provide *, ++ (both prefix and postfix), ==, and !=
+with the appropriate semantics. The iterators for list also provide –– for moving backward in the sequence; that’s called
+a bidirectional iterator. The iterators for vector also provide ––, [ ], +, and — and are called random-access
+iterators. (See §20.10.1.)
+• Provides insert() and erase(), front() and back(), push_back() and pop_back(), size(), etc.; vector and map also
+provide subscripting (e.g., operator [ ]).
+• Provides comparison operators (==, !=, <, <=, >, and >=) that compare the elements. Containers use lexicographical
+ordering for <, <=, >, and >=; that is, they compare the elements in order starting with the first.
+
+23. What should begin() and end() do for a container?
+begin() returns iterator to the first element of the sequence, end() return iterator to the one beyond last element of the sequence.
+
+24. What containers does the STL provide?
+The STL provides quite a few containers:
+vector
+list
+deque
+map
+multimap
+unordered_map
+unoerdered_multimap
+set
+multiset
+unordered_set
+unordered_multiset
+array
+
+25. What is an iterator category? What kinds of iterators does the STL offer?
+We have talked about iterators as if all iterators are interchangeable. They are interchangeable if you do only the simplest
+operations, such as traversing a sequence once reading each value once. If you want to do more, such as iterating backward or
+subscripting, you need one of the more advanced iterators.
+From the operations offered, we can see that wherever we can use an output iterator or an input iterator, we can use a forward
+iterator. A bidirectional iterator is also a forward iterator, and a random-access iterator is also a bidirectional iterator.
+Note that since the iterator categories are not classes, this hierarchy is not a class hierarchy implemented using derivation.
+
+26. What operations are provided by a random-access iterator, but not a bidirectional iterator?
+We can subscript and add an integer to a random-access iterator using + and substract an integer using -.
+We can find the distance between two random-access iterators to the same sequence by substracting one from another.
