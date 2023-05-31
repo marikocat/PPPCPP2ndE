@@ -122,6 +122,12 @@ just have to know about iterators. Conversely, if I’m a data provider, I no lo
 variety of users; I just have to implement an iterator for my data. At the most basic level, an iterator is defined by just the *,
 ++, ==, and != operators. That makes them simple and fast.
 
+If we have N kinds of containers of data and M things we’d like to do with them, we can easily end up writing N*M pieces of
+code. If the data is of K different types, we could even end up with N*M*K pieces of code. The STL addresses this
+proliferation by having the element type as a parameter (taking care of the K factor) and by separating access to data from
+algorithms. By using iterators to access data in any kind of container from any algorithm, we can make do with N+M
+algorithms. This is a huge simplification.
+
 13. What is the STL?
 The C++ standard library provides a framework for dealing with data as sequences of elements, called the STL. STL is usually
 said to be an acronym for “standard template library.” The STL is the part of the ISO C++ standard library that provides
