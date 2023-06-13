@@ -40,6 +40,7 @@ void allocator<T>::destroy(T* p)
 struct Range_error : out_of_range { // enhanced vector range error reporting
 	int index;
 	Range_error(int i) :out_of_range("Range error"), index(i) { }
+	Range_error() :out_of_range("Out of range") { }
 };
 
 // an almost real vector of Ts:
@@ -49,10 +50,10 @@ template<typename T, typename A = allocator<T>> class vector {
 	T* elem = nullptr; // pointer to the elements (or 0)
 	int space = 0; // number of elements plus number of free slots
 public:
+	class iterator;
+
 	using size_type = unsigned long;
 	using value_type = T;
-	using iterator = T*;
-	using const_iterator = const T*;
 
 	vector() {}
 	explicit vector(int s) { resize(s); }
@@ -75,16 +76,96 @@ public:
 	void push_back(const T& val);
 	void reserve(int newalloc);
 
-	iterator begin() { return elem; }
-	const_iterator begin() const { return elem; }
-	iterator end() { return elem + sz; }
-	const_iterator end() const { return elem + sz; }
+	iterator begin() { return iterator{ elem, elem, elem + sz }; }
+	iterator end() { return iterator{elem + sz, elem, elem + sz}; }
 
 	iterator insert(iterator p, const T& val);
 	iterator erase(iterator p);
 
 	T& back() { return elem[sz - 1]; }
 };
+
+template<typename T, typename A>
+class vector<T, A>::iterator {
+	T* curr;
+	T* first;
+	T* last;
+public:
+	iterator(T* p, T* f, T* l) : curr{ p }, first{f}, last{l} {}
+
+	iterator& operator++();
+	iterator& operator--();
+	iterator& operator+=(int n);
+	iterator& operator-=(int n);
+	iterator operator+(int n);
+	iterator operator-(int n);
+	int operator-(const iterator& b) const { return curr - b.curr; }
+	T& operator*();
+	T& operator[](int n);
+
+	bool operator==(const iterator& b) const { return curr == b.curr; }
+	bool operator!=(const iterator& b) const { return curr != b.curr; }
+};
+
+template<typename T, typename A>
+typename vector<T, A>::iterator& vector<T, A>::iterator::operator++()
+{
+	++curr;
+	if (curr < first || curr > last) throw Range_error();
+	return *this;
+}
+
+template<typename T, typename A>
+typename vector<T, A>::iterator& vector<T, A>::iterator::operator--()
+{
+	--curr;
+	if (curr < first || curr > last) throw Range_error();
+	return *this;
+}
+
+template<typename T, typename A>
+typename vector<T, A>::iterator& vector<T, A>::iterator::operator+=(int n)
+{
+	curr += n;
+	if (curr < first || curr > last) throw Range_error();
+	return *this;
+}
+
+template<typename T, typename A>
+typename vector<T, A>::iterator& vector<T, A>::iterator::operator-=(int n)
+{
+	curr -= n;
+	if (curr < first || curr > last) throw Range_error();
+	return *this;
+}
+
+template<typename T, typename A>
+typename vector<T, A>::iterator vector<T, A>::iterator::operator+(int n)
+{
+	if (curr + n < first || curr + n > last) throw Range_error();
+	return iterator{ curr + n, first, last };
+}
+
+template<typename T, typename A>
+typename vector<T, A>::iterator vector<T, A>::iterator::operator-(int n)
+{
+	if (curr - n < first || curr - n > last) throw Range_error();
+	return iterator{ curr - n, first, last };
+}
+
+template<typename T, typename A>
+T& vector<T, A>::iterator::operator*()
+{
+	if (curr < first || curr >= last) throw Range_error();
+	return *curr;
+}
+
+template<typename T, typename A>
+T& vector<T, A>::iterator::operator[](int n)
+{
+	if (curr + n < first || curr + n >= last) throw Range_error();
+	return *(curr + n);
+}
 
 template<typename T, typename A>
 vector<T, A>::vector(const vector& a)
@@ -210,15 +291,18 @@ Iterator find(Iterator start, Iterator end, const T& v)
 	return res;
 }
 
-void print1(const vector<double>& v)
+template<typename T>
+void print1(const vector<T>& v)
 {
 	for (int i = 0; i < v.size(); ++i)
-		cout << v[i] << '\n';
+		cout << v[i] << ' ';
+	cout << '\n';
 }
 
-void print2(const vector<int>& v)
+template<typename T>
+void print2(vector<T>& v)
 {
-	for (int x : v)
+	for (T x : v)
 		cout << x << ' ';
 	cout << '\n';
 }
@@ -227,22 +311,20 @@ int main()
 {
 	vector<int> v;
 	v.resize(10, 1);
-	//print_some(v);
+
 	v.resize(5);
 	v.push_back(7);
 	v.push_back(8);
-	//print_some(v);
+
 	vector<int> v2;
 	v2 = v;
-	for (int i = 0; i < v2.size(); ++i)
-		cout << v2[i] << ' ';
-	cout << '\n';
+	print1(v2);
 
 	print2(v);
 
 	vector<int>::iterator p = find(v.begin(), v.end(), 7);
 	if (p == v.end()) cout << "not found\n";
-	else cout << "At position: " << p - v.begin() << "\n";
+	else cout << "7 at position: " << p - v.begin() << "\n";
 	for (vector<int>::size_type i = 0; i < v.size(); ++i) cout << v[i] << ' ';
 	cout << '\n';
 
