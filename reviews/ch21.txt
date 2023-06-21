@@ -1,0 +1,297 @@
+1. What are examples of useful STL algorithms?
+The standard library offers about 80 algorithms. All are useful for someone sometimes; we focus on some that are often useful
+for many and on some that are occasionally very useful for someone:
+r = find(b, e, v);
+r points to the first occurence of v in [b:e).
+r = find_if(b, e, p)
+r points to the first element x in [b:e) so that p(x) is true.
+
+x = count(b, e, v)
+x is the number of occurences of v in [b:e).
+x = count_if(b, e, p)
+x is the number of elements in [b:e) so that p(x) is true.
+
+sort(b, e)
+Sort [b:e) using <.
+sort(b, e, p)
+Sort [b:e) using p.
+
+copy(b, e, b2)
+Copy [b:e) to [b2:b2 + (e - b)); there had better be enough elements after b2.
+unique_copy(b, e, b2)
+Copy [b:e) to {b2:b2 + (e- b)); don't copy adjacent duplicates.
+
+merge(b, e, b2, e2, r)
+Merge two sorted sequences [b2:e2) and [b:e) into [r:r + (e - b) + (e2 - b2)).
+
+r = equal_merge(b, e, v)
+r is the subsequnce of the sorted range [b:e) with the value v, basically, a binary search for v.
+
+equal(b, e, b2)
+Do all elements of [b:e) and [b2:b2 + (e - b)) compare equal?
+
+x = accumulate(b, e, i)
+x is the sum of i and the elements of [b:e).
+x = accumulate(b, e, i, op) Like theother accumulate, but with the "sum" calculated using op.
+
+x = inner_product(b, e, b2, i)
+x is the ineer product of [b:e) and [b2:b2 + (e - b)).
+x = inner_product(b, e, b2, i, op, op2)
+Like the other inner_product, but with op and op2 instead of + and *.
+The standard library algorithms are found in <algorithm>.
+These algorithms take one or more sequences. An input sequence is defined by a pair of iterators; an output sequence is defined by an iterator to
+its first element. Typically an algorithm is parameterized by one or more operations that can be defined as function objects or
+as functions. The algorithms usually report “failure” by returning the end of an input sequence.
+
+2. What does find() do? Give at least five examples.
+r = find(b, e, v);
+r points to the first occurence of v in [b:e).
+Arguably, the simplest useful algorithm is find(). It finds an element with a given value in a sequence.
+First of all, find() operates on a sequence defined by a pair of iterators. We are looking for the value val in the half-open
+sequence [first:last). The result returned by find() is an iterator. That result points either to the first element of the sequence
+with the value val or to last. Returning an iterator to the one-beyond-the-last element of a sequence is the most common STL
+way of reporting “not found.”
+The find() algorithm is generic. That means that it can be used for different data types. In fact, it is generic in two ways; it can
+be used for
+• Any STL-style sequence
+• Any element type
+
+void f(vector<int>& v, int x) // works for vector of int
+{
+vector<int>::iterator p = find(v.begin(),v.end(),x);
+if (p!=v.end()) { /* we found x */ }
+// . . .
+}
+
+void f(list<string>& v, string x) // works for list of string
+{
+list<string>::iterator p = find(v.begin(),v.end(),x);
+if (p!=v.end()) { /* we found x */ }
+// . . .
+}
+
+So, find() is extremely flexible: as long as we obey the simple rules for iterators, we can use find() to find elements for any
+sequence we can think of and for any container we care to define. For example, we can use find() to look for a character in a
+Document as defined in §20.6:
+
+void f(Document& v, char x) // works for Document of char
+{
+Text_iterator p = find(v.begin(),v.end(),x);
+if (p!=v.end()) { /* we found x */ }
+// . . .
+}
+
+3. What does count_if() do?
+x = count_if(b, e, p)
+x is the number of elements in [b:e) so that p(x) is true.
+
+4. What does sort(b,e) use as its sorting criterion?
+sort(b, e)
+Sort [b:e) using <.
+By default, comparison for equality is done using == and ordering is done based on < (less than).
+
+5. How does an STL algorithm take a container as an input argument?
+6. How does an STL algorithm take a container as an output argument?
+An input sequence is defined by a pair of iterators: to its first and to its last element (one-past-the-end element); an output sequence is defined by an iterator to
+its first element.
+
+7. How does an STL algorithm usually indicate “not found” or “failure”?
+The algorithms usually report “failure” by returning the end of an input sequence. For example, find(b,e,v)
+returns e if it doesn’t find v.
+
+8. What is a function object?
+A “function object” is an object that can behave like a function and defines operator() for that. We need an object because objects can store data, such as the value with which to compare.
+A function call can be seen as an operator, the “( ) operator,” just like any other operator. The “( )
+operator” is also called the function call operator and the application operator.
+We have here a mechanism that allows for a “function” to “carry around” data that it needs. Clearly, function objects provide
+us with a very general, powerful, and convenient mechanism.
+We can directly or indirectly call the function object using the normal function call notation.
+Use of function objects is the main method of parameterization in the STL. We use function objects to specify what we are
+looking for in searches (§21.3), for defining sorting criteria (§21.4.2), for specifying arithmetic operations in numerical
+algorithms (§21.5), for defining what it means for values to be equal (§21.8), and for much more. The use of function objects is
+a major source of flexibility and generality.
+
+9. In which ways does a function object differ from a function?
+Function objects are usually very efficient. In particular, passing a small function object by value to a template function
+typically leads to optimal performance. The reason is simple, but surprising to people more familiar with passing functions as
+arguments: typically, passing a function object leads to significantly smaller and faster code than passing a function! This is
+true only if the object is small (something like zero, one, or two words of data) or passed by reference and if the function call
+operator is small (e.g., a simple comparison using <) and defined to be inline (e.g., has its definition within its class itself).
+Most of the examples in this chapter — and in this book — follow this pattern. The basic reason for the high performance of
+small and simple function objects is that they preserve sufficient type information for compilers to generate optimal code. Even
+older compilers with unsophisticated optimizers can generate a simple “greater-than” machine instruction for the comparison
+in Larger_than rather than calling a function. Calling a function typically takes 10 to 50 times longer than executing a simple
+comparison operation. In addition, the code for a function call is several times larger than the code for a simple comparison.
+We tend to prefer function objects
+• If they need to store a value between calls, or
+• If they are so short that inlining can make a difference (at most a handful of primitive operations).
+
+10. What is a predicate?
+A predicate is a function or function object with defined operator() that returns true or false.
+
+11. What does accumulate() do?
+x = accumulate(b, e, i)
+Add a sequence of values; e.g., for {a, b, c, d} produce i + a + b + c + d. The type of the result x is the type of the initial value i.
+The simplest and most useful numerical algorithm is accumulate(). In its simplest form, it adds a sequence of values:
+
+template<typename In, typename T>
+// requres Input_iterator<T>() && Number<T>()
+T accumulate(In first, In last, T init)
+{
+while (first!=last) {
+init = init + *first;
+++first;
+}
+return init;
+}
+
+Given an initial value, init, it simply adds every value in the [first:last) sequence to it and returns the sum. The variable in
+which the sum is computed, init, is often referred to as the accumulator.
+The STL offers a second four-argument version of accumulate() where we
+can specify the operation to be used:
+
+template<typename In, typename T, typename BinOp>
+// requires Input_iterator<In>() && Number<T>()
+// && Binary_operator<BinOp,Value_type<In>,T>()
+T accumulate(In first, In last, T init, BinOp op)
+{
+while (first!=last) {
+init = op(init, *first);
+++first;
+}
+return init;
+}
+
+Any binary operation that accepts two arguments of the accumulator’s type can be used here.
+
+12. What does inner_product() do?
+Take two vectors, multiply each pair of elements with the same subscript, and add all of those products. That’s called the inner
+product of the two vectors and is a most useful operation in many areas (e.g., physics and linear algebra).
+The STL version:
+
+template<typename In, typename In2, typename T>
+// requires Input_iterator<In> && Input_iterator<In2>
+// && Number<T> (§19.3.3)
+T inner_product(In first, In last, In2 first2, T init)
+// note: this is the way we multiply two vectors (yielding a scalar)
+{
+while(first!=last) {
+init = init + (*first) * (*first2); // multiply pairs of elements
+++first;
+++first2;
+}
+return init;
+}
+
+This generalizes the notion of inner product to any kind of sequence of any type of element. As an example, consider a stock
+market index. The way that works is to take a set of companies and assign each a “weight.” For example, in the Dow Jones
+Industrial index Alcoa had a weight of 2.4808 when last we looked. To get the current value of the index, we multiply each
+company’s share price with its weight and add all the resulting weighted prices together. Obviously, that’s the inner product of
+the prices and the weights.
+Note that inner_product() takes two sequences. However, it takes only three arguments: only the beginning of the second
+sequence is mentioned. The second sequence is supposed to have at least as many elements as the first. If not, we have a runtime
+error. As far as inner_product() is concerned, it is OK for the second sequence to have more elements than the first;
+those “surplus elements” will simply not be used.
+The two sequences need not be of the same type, nor do they need to have the same element types.
+
+13. What is an associative container? Give at least three examples.
+Data structures similar to map and unordered_map are known under many
+names, such as associative arrays, hash tables, and red-black trees. Popular and useful concepts always seem to have many
+names. In the standard library, we collectively call all such data structures associative containers.
+The standard library provides eight associative containers:
+map - an ordered container of (key, value) pairs
+set - an ordered container of keys
+unordered_map - an unordered container of (key, value) pairs
+unordered_set - an unordered container of keys
+multimap - a map where a key can occur multiple times
+multiset - a set where a key can occur multiple times
+unordered_multimap - an unordered_map where a key can occur multiple times
+unordered_multiset - an unordered_set where a key can occur multiple times
+These containers are found in <map>, <set>, <unordered_map>, and <unordered_set>.
+
+14. Is list an associative container? Why not?
+No, it's not.
+
+
+15. What is the basic ordering property of binary tree?
+A tree is built up from nodes. A Node holds a key, its
+corresponding value, and pointers to two descendant Nodes.
+Given that the name of the Node member that holds the key value is first, the basic rule of a binary search tree is
+left–>first<first && first<right–>first
+That is, for every node,
+• Its left sub-node has a key that is less than the node’s key, and
+• The node’s key is less than the key of its right sub-node
+You can verify that this holds for each node in the tree. That allows us to search “down the tree from its root.”
+We just compare our way down the tree until we find what we are looking for or the place where it should have been.
+
+16. What (roughly) does it mean for a tree to be balanced?
+A tree is called balanced when each sub-tree has approximately as many nodes as every other sub-tree that’s
+equally far from the root. Being balanced minimizes the average number of nodes we have to visit to reach a node.
+A tree is balanced when each node has about as many descendants to its left as to its right. If a tree with N nodes is balanced, we have to at most look at
+log2(N) nodes to find a node.
+The trees used to implement maps are balanced.
+
+17. How much space per element does a map take up?
+Size of key/value pair type, and size of 2 pointers.
+A Node may also hold some more data which the map will use to keep its tree of nodes balanced.
+
+18. How much space per element does a vector take up?
+The size of the type of element.
+
+19. Why would anyone use an unordered_map when an (ordered) map is available?
+To find an element in a map, the subscript operator needs to examine all the elements of the tree from the root to the element
+with the right value or to a leaf. On average the cost is proportional to the depth of the tree. A balanced binary tree holding N
+elements has a maximum depth of log2(N); the cost is O(log2(N)).
+The actual cost will depend on how soon in our search we find our values and how expensive comparisons and iterations are.
+It is usually somewhat more expensive to chase pointers (as the map lookup does) than to increment a pointer (as find() does
+in a vector).
+For some types, notably integers and character strings, we can do even better than a map’s tree search. We will not go into
+details, but the idea is that given a key, we compute an index into a vector. That index is called a hash value and a container
+that uses this technique is typically called a hash table. The number of possible keys is far larger than the number of slots in the
+hash table. For example, we often use a hash function to map from the billions of possible strings into an index for a vector
+with 1000 elements. This can be tricky, but it can be handled well and is especially useful for implementing large maps. The
+main virtue of a hash table is that on average the cost of a lookup is (near) constant and independent of the number of elements
+in the table, that is, O(1). Obviously, that can be a significant advantage for large maps, say a map of 500,000 web addresses.
+The STL unordered_map is implemented using a hash table, just as the STL map is implemented using a balanced binary
+tree, and an STL vector is implemented using an array. Part of the utility of the STL is to fit all of these ways of storing and
+accessing data into a common framework together with algorithms.
+• Use vector unless you have a good reason not to.
+• Use map if you need to look up based on a value (and if your key type has a reasonable and efficient less-than
+operation).
+• Use unordered_map if you need to do a lot of lookup in a large map and you don’t need an ordered traversal (and if
+you can find a good hash function for your key type).
+You can use an unordered_map with a key of type string or
+int exactly like a map, except that when you iterate over the elements, the elements will not be ordered.
+
+20. How does a set differ from a map?
+We can think of a set as a map where we are not interested in the values, or rather as a map without values.
+What are sets useful for? As it happens, there are lots of problems that require us to remember if we have seen a value.
+Keeping track of which fruits are available (independently of price) is one example; building a dictionary is another. A slightly
+different style of usage is having a set of “records”; that is, the elements are objects that potentially contain “lots of”
+information — we simply use a member as the key.
+One advantage of set over map is that you can use the value obtained from an iterator directly. Since there is no (key,value)
+pair as for map, the dereference operator gives a value of the element type.
+
+21. How does a multimap differ from a map?
+multimap - a map where a key can occur multiple times.
+
+22. Why use a copy() algorithm when we could “just write a simple loop”?
+Many simple algorithms are
+useful — even some that are trivial to write. Why bother to write new code when you can use what others have written and
+debugged for you, however simple?
+STL algorithms are programmed for maximal generality and optimal
+performance; they do not (by default) do range checking or other potentially expensive tests to protect their users.
+
+23. What is a binary search?
+Basically, a binary search works like this:
+Assume that we are looking for the value x; look at the middle element:
+• If the element’s value equals x, we found it!
+• If the element’s value is less than x, any element with value x must be to the right, so we look at the right half (doing a
+binary search on that half).
+• If the value of x is less than the element’s value, any element with value x must be to the left, so we look at the left half
+(doing a binary search on that half).
+• If we have reached the last element (going left or right) without finding x, then there is no element with that value.
+For longer sequences, a binary search is much faster than find() (which is a linear search). The standard library algorithms for
+binary search are binary_search() and equal_range(). What do we mean by “longer”? It depends, but ten elements are
+usually sufficient to give binary_search() an advantage over find(). For a sequence of 1000 elements, binary_search() will
+be something like 200 times faster than find() because its cost is O(log2(N)).
