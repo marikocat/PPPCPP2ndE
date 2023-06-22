@@ -1,0 +1,10 @@
+{ball 101 20.5}
+{brush 102 10.5}
+{paint 103 30.0}
+{pen 104 5.0}
+{pencil 105 1.25}
+{eraser 106 2.1}
+{file 107 0.5}
+{pad 108 3.5}
+{post-it 109 10.8}
+{rucksack 110 100.25}
