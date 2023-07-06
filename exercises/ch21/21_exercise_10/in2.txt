@@ -1,0 +1,9 @@
+Customer 1
+Adress 1
+{Item1 20.5 5}{Item2 100.0 6}
+Customer 5
+Adress 5
+{Item3 1.5 55}{Item4 10.0 1}{Item8 1000.0 1}
+Customer 4
+Adress 4
+{Item4 0.01 3}

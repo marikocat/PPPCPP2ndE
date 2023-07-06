@@ -1,0 +1,15 @@
+Customer 7
+Adress 7
+{Item4 20.0 35}{Item5 70.0 11}{Item5 70.0 11}{Item5 70.0 11}
+Customer 2
+Adress 2
+{Item3 0.5 55}{Item4 80.0 1}
+Customer 3
+Adress 3
+{Item4 250.0 3}{Item5 70.0 11}
+Customer 1
+Adress 1
+{Item1 20.5 5}{Item2 100.0 6}
+Customer 7
+Adress 7
+{Item4 20.0 35}{Item5 70.0 11}

@@ -1,0 +1,8 @@
+13. Write a program to "clean up" a text file for use in a word query program; that is, replace punctuation with whitespace,
+put words into lower case, replace don't with do not (etc.), and remove plurals (e.g., ships becomes ship). Don't be too
+ambitious. For example, it is hard to determine plurals in general, so just remove an s if you find both ship and ships. Use
+that program on a real-world text file with at least 5000 words (e.g., a research paper).
+14. Write a program (using the output from the previous exercise) to answer questions such as: "How many occurrences of
+ship are there in a file?" "Which word occurs most frequently?" "Which is the longest word in the file?" "Which is the
+shortest?" "List all words starting with s." "List all four-letter words."
+15. Provide a GUI for the program from the previous exercise. which
