@@ -1,0 +1,211 @@
+1. Where do we find “text”?
+We manipulate text essentially all the time. Our books are full of text, much of what we see on our computer screens is text, and
+our source code is text. Our communication channels (of all sorts) overflow with words. Everything that is communicated
+between two humans could be represented as text, but let’s not go overboard. Images and sound are usually best represented as
+images and sound (i.e., just bags of bits), but just about everything else is fair game for program text analysis and
+transformation.
+
+2. What are the standard library facilities most frequently useful for text analysis?
+We have been using iostreams and strings since Chapter 3, so here, we’ll just briefly review those libraries. 
+The I/O stream library doesn’t just do input and output; 
+it also performs conversions between string formats and types in memory. The standard library I/O streams provide
+facilities for reading, writing, and formatting strings of characters.
+Maps are particularly useful for text processing, so we present an example of their use for email analysis.
+After this review, this chapter is concerned with searching for patterns in text using regular expressions.
+
+3. Does insert() add before or after its position (or iterator)?
+s.insert(pos, x);
+Insert x before s[pos]; x can be a string ora C-style string.
+
+4. What is Unicode?
+A character set, providing thousands of characters (such as £, Ω, μ, δ in addition to “ordinary characters”).
+
+5. How do you convert to and from a string representation (to and from some other type)?
+We saw how to turn an integer into a string using an ostringstream. 
+This technique can be generalized to any type that has a << operator:
+
+template<typename T> string to_string(const T& t)
+{
+ostringstream os;
+os << t;
+return os.str();
+}
+
+In fact, to_string() can be used not just for numeric values, but for any class T with a << operator. 
+The opposite conversion, from strings to numeric values, is about as easy, and as useful:
+
+template<typename T> T from_string(const string& s)
+{
+istringstream is {s};
+T t;
+if (!(is >> t)) throw bad_from_string{};
+return t;
+}
+
+The added complication of from_string() compared to to_string() comes because a string can represent values of many
+types. This implies that we must say which type of value we want to extract from a string. It also implies that the string we
+are looking at may not hold a representation of a value of the type we expect.
+So there is a possibility of error, which we have represented by the exception bad_from_string.
+Note how to_string() and from_string() are similar in function. In fact, they are roughly inverses of each other; that is
+(ignoring details of whitespace, rounding, etc.), for every “reasonable type T” we have
+s==to_string(from_string<T>(s)) // for all s
+and
+t==from_string<T>(to_string(t)) // for all t
+Here, “reasonable” means that T should have a default constructor, a >> operator, and a matching << operator defined.
+Note also how the implementations of to_string() and from_string() both use a stringstream to do all the hard work.
+This observation has been used to define a general conversion operation between any two types with matching << and >>
+operations:
+template<typename Target, typename Source>
+Target to(Source arg)
+{
+stringstream interpreter;
+Target result;
+if (!(interpreter << arg) // write arg into stream
+|| !(interpreter >> result) // read result from stream
+|| !(interpreter >> std::ws).eof()) // stuff left in stream?
+throw runtime_error{"to<>() failed"};
+return result;
+}
+The curious and clever !(interpreter>>std::ws).eof() reads any whitespace that might be left in the stringstream after
+we have extracted the result. Whitespace is allowed, but there should be no more characters in the input and we can check that
+by seeing if we are at “end of file.” So if we try to read an int from a string, both to<int>("123") and to<int>("123 ") will
+succeed, but to<int>("123.5") will not because of that last .5.
+
+6. What is the difference between cin>>s and getline(cin,s) assuming s is a string?
+cin >> s Read a whitespace-separated word into s from cin.
+getline(cin ,s) Read a line into s from cin.
+
+7. List the standard streams.
+The standard streams are organized into a class hierarchy.
+istream ostream
+istringstream ifstream iostream ostringstream ofstream
+stringstream fstream
+Together, these classes supply us with the ability to do I/O to and from files and strings (and anything that can be made to look
+like a file or a string, such as a keyboard and a screen). The iostreams
+provide fairly elaborate formatting facilities. Since inheritance, for example, a
+stringstream can be used as an iostream or as an istream or as an ostream.
+
+8. What is the key of a map? Give examples of useful key types.
+A map is an ordered sequence of (key,value) pairs in which you can look up a value based on a key.
+The only potential competitor to map in a popularity contest is unordered_map, and
+that’s a map optimized for keys that are strings.
+Associative arrays (maps, hash tables) are key (pun intended) to a lot of text processing. The reason is simply that when we
+process text, we collect information, and that information is often associated with text strings, such as names, addresses, postal
+codes, Social Security numbers, job titles, etc. Even if some of those text strings could be converted into numeric values, it is
+often more convenient and simpler to treat them as text and use that text for identification.
+
+9. How do you iterate over the elements of a map?
+With iterator or range loop.
+
+10. What is the difference between a map and a multimap? Which useful map operation is missing for multimap, and
+why?
+We used a multimap because we wanted to gather many messages from the same address together in one place. 
+The standard library multimap does that (makes it easy to access elements with the same key).
+In C++, the multimap container is a built-in associative container that allows multiple values to be associated with a single key. It provides operations like insertion, deletion, and searching based on keys. However, there is no built-in map operation (subscripting) to directly retrieve all the values associated with a particular key in a multimap.
+The reason why this operation is missing is that the C++ standard library provides a generic solution for retrieving values associated with a key in any associative container, not just multimap. This is achieved using the member function equal_range(), which is available for all associative containers, including multimap.
+The equal_range() function returns a pair of iterators representing the range of elements with a key equal to the provided key. By using these iterators, you can iterate over the range and access all the values associated with the key.
+
+11. What operations are required for a forward iterator?
+increment operator ++ and dereference operator *.
+If (*p).m is valid, p->m can be used as a shorthand.
+Equality comparison (==, !=): The iterator must support comparison operators to determine equality or inequality with another iterator.
+Copy construction and assignment: The iterator must be copyable using the copy constructor and assignable using the assignment operator.
+
+12. What is the difference between an empty field and a nonexistent field? Give two examples.
+Why are the find_from_addr() and find_subject() functions so different? For example, one returns a bool and the other
+a string. They are different because we wanted to make a point:
+find_from_addr() distinguishes between finding an address line with an empty address ("") and finding no address
+line. In the first case, find_from_addr() returns true (because it found an address) and sets s to "" (because the
+address just happens to be empty). In the second case, it returns false (because there was no address line).
+find_subject() returns "" if there was an empty subject or if there was no subject line.
+Is the distinction made by find_from_addr() useful? Necessary? We think that the distinction can be useful and that we
+definitely should be aware of it. It is a distinction that comes up again and again when looking for information in a data file:
+did we find the field we were looking for and was there something useful in it? In a real program, both the find_from_addr()
+and find_subject() functions would have been written in the style of find_from_addr() to allow users to make that
+distinction.
+
+13. Why do we need an escape character to express regular expressions?
+A regular expression - a notation for patterns in character strings.
+Or a regular expression specifies a pattern that can be used to match characters from a string.
+We need prefix a letter that is a name of a class of characters with a backslash in the way
+special characters have always been indicated in C++.
+If you want to use one of the special characters in a pattern, you have to “escape it” using a backslash; for example, in a
+pattern + is the one-or-more operator, but \+ is a plus sign.
+
+14. How do you get a regular expression into a regex variable?
+We find the standard library regular expressions in <regex>. Given that, we can define a pattern pat:
+regex pat {R"(\w{2}\s*\d{5}(–\d{4})?)"}; // postal code pattern
+A regex pattern is a kind of string, so we can initialize it with a string. Here, we used a raw string literal. However, a
+regex is not just a string, but the somewhat sophisticated mechanism for pattern matching that is created when you initialize a
+regex (or assign to one) is hidden and beyond the scope of this book.
+
+15. What does \w+\s\d{4} match? Give three examples. What string literal would you use to initialize a regex variable
+with that pattern?
+word chararcter one or more, whitespace, four digits:
+a 1234
+aB 2536
+xy 2578
+"\\w+\\s\\d{4}"
+R"(\w+\s\d{4})"
+
+16. How (in a program) do you find out if a string is a valid regular expression?
+When we assign a pattern to a regex, the pattern is checked, and if the regular expression matcher can’t use it for matching
+because it’s illegal or too complicated, a bad_expression exception is thrown.
+
+17. What does regex_search() do?
+There are two basic uses of regular expressions:
+• Searching for a string that matches a regular expression in an (arbitrarily long) stream of data — regex_search() looks
+for its pattern as a substring in the stream.
+• Matching a regular expression against a string (of known size) — regex_match() looks for a complete match of its
+pattern and the string.
+The regex_search(line, matches, pat) searches the line for anything that matches the regular expression stored in pat, and
+if it finds any matches, it stores them in matches. Naturally, if no match was found, regex_search(line, matches, pat)
+returns false.
+The matches variable is of type smatch. The s stands for “sub” or for “string.” Basically, an smatch is a vector of submatches
+of type string. The first element, here matches[0], is the complete match. We can treat matches[i] as a string if
+i<matches.size(). So if — for a given regular expression — the maximum number of sub-patterns is N, we find
+matches.size()==N+1.
+
+18. What does regex_match() do?
+If we are checking all the characters on each line, so we use regex_match() rather than
+regex_search().
+The difference between those two is exactly that regex_match() must match every character of its input to
+succeed, whereas regex_search() looks at the input trying to find a substring that matches.
+
+19. How do you represent the character dot (.) in a regular expression?
+"escape" dot -> \.
+
+20. How do you represent the notion of “at least three” in a regular expression?
+{3,}
+
+21. Is 7 a \w character? Is _ (underscore)?
+alphanumeric plus underscore - \w.
+
+22. What is the notation for an uppercase character?
+\u
+
+23. How do you specify your own character set?
+[a-c]
+
+24. How do you extract the value of an integer field?
+from_string(matches[i]);
+We used from_string() to extract an integer value from the data fields. We had already checked that those
+fields consisted exclusively of digits so we did not have to check that the string-to-int conversion succeeded.
+
+25. How do you represent a floating-point number as a regular expression?
+\d+(\.\d+)?
+
+26. How do you extract a floating-point value from a match?
+make it sub-match and then convert it to double from string of sub-match
+
+27. What is a sub-match? How do you access one?
+The matches variable is of type smatch. The s stands for “sub” or for “string.” Basically, an smatch is a vector of submatches
+of type string. The first element, here matches[0], is the complete match. We can treat matches[i] as a string if
+i<matches.size(). So if — for a given regular expression — the maximum number of sub-patterns is N, we find
+matches.size()==N+1.
+So, what is a sub-pattern? A good first answer is “Anything in parentheses in the pattern.” Looking at \w{2}\s*\d{5}(–
+\d{4})?, we see the parentheses around the four-digit extension of the ZIP code. That’s the only sub-pattern we see, so we
+guess (correctly) that matches.size()==2.
+We can ask if a sub-match succeeded by looking at its matched member, here matches[1].matched. In case you
+wonder: when matches[i].matched is false, the unmatched sub-pattern matches[i] prints as the empty string. Similarly, a
+sub-pattern that doesn’t exist, such as matches[17] for the pattern above, is treated as an unmatched sub-pattern.
