@@ -1,0 +1,6 @@
+6. Write a program that finds dates in a text file. Write out each line containing at least one date in the format line–
+number: line. Start with a regular expressi 5223000048400011 on for a simple format, e.g., 12/24/2000, and test the program with that.
+Then, add more formats.
+expression for a simple 378282246310005 format, e.g., 12.24.2000, and test the program
+7. Write a program (similar to the one in the previous 4003600000000014 exercise) that finds credit card numbers in a file. Do a bit of research
+to find out what credit card formats are really used.

@@ -1,0 +1,3 @@
+14. Write a program that, like \nthe one in §23.8.7, can be used to experiment with pattern matching by typing in a pattern.
+However, have it read a file into memory (representing a line break with the newline character, '\n'), so that you can
+experiment with patterns spanning line breaks. Test it and document a dozen test patterns.

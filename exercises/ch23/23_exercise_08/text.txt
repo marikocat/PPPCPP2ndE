@@ -1,0 +1,2 @@
+8. Modify the program from §23.8.7 so that it takes as inputs a pattern and a file name. Its output should be the numbered
+lines (line-number: line) that contain a match of the pattern. If no matches are found, no output should be produced.
