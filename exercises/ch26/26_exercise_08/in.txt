@@ -1,0 +1,5 @@
+Circle(Point(200,100),15)
+Circle(Point(200,100),30)
+Circle(Point(200,100),45)
+Rectangle(Point(300,300),Point(600,450))
+Line(Point(250,50),Point(250,650))

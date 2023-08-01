@@ -1,0 +1,10 @@
+The system_clock is one of the standard timers, 
+and system_clock::now() returns the point of time (a time_point) at
+which it is called. Subtract two time_points (here, t2-t1) 
+and you get a length of time (a duration). We can use auto to
+save us from the details of the duration and time_point types, 
+which are surprisingly complicated if your view of time is
+simply what you see on a wristwatch. In fact, the standard 
+library’s timing facilities were originally designed for advanced
+physics applications and are far more flexible 
+and general than most users need.
