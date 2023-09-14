@@ -1,4 +1,4 @@
-#include "..\std_lib_facilities.h"
+#include "../std_lib_facilities.h"
 
 int main()
 try
@@ -29,7 +29,7 @@ try
 			numbers.push_back(n);
 		}
 
-		vector<char> userNumbers;
+		vector<int> userNumbers;
 		while (true)
 		{
 			cout << "Enter 4 different nums: ";

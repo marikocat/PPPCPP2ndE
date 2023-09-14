@@ -1,11 +1,11 @@
-#include "..\std_lib_facilities.h"
+#include "../std_lib_facilities.h"
 
 int main()
 try
 {
 	vector<int> numbers{ 1, 2, 3, 4 };
 
-	vector<char> userNumbers;
+	vector<int> userNumbers;
 	while (true)
 	{
 		cout << "Enter 4 different nums: ";
