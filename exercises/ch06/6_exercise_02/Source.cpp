@@ -1,5 +1,3 @@
-#include "../std_lib_facilities.h"
-
 /*
 	Grammar:
 
@@ -11,7 +9,6 @@
 		Primary
 		Term "*" Primary
 		Term "/" Primary
-		Term "%" Primary
 	Primary:
 		Number
 		"(" Expression ")"
@@ -19,6 +16,8 @@
 	Number:
 		floating-point-literal
 */
+
+#include "../std_lib_facilities.h"
 
 //------------------------------------------------------------------------------
 
