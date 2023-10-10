@@ -1,4 +1,4 @@
-#include "..\std_lib_facilities.h"
+#include "../std_lib_facilities.h"
 
 void print(const string& label, const vector<int>& data)
 // Only read arguments, so it safe to pass them by const-reference
@@ -11,7 +11,6 @@ void print(const string& label, const vector<int>& data)
 
 int check_add(int a, int b)
 // Adds two integers performing overflow control to avoid undefined behavior.
-// (Search for INT32-C on https://www.securecoding.cert.org)
 {
     if (((b > 0) && (a > (numeric_limits<int>::max() - b))) ||
         ((b < 0) && (a < (numeric_limits<int>::min() - b))))
@@ -51,15 +50,14 @@ try {
     vector<int> data;
     int max{ 0 };         // Keep track of maximum int obtained
     int min{ 0 };         // Keep track of minimum int obtained
-    int begin{ -500 };    // Value from calculate Fibonacci sequences
-    int end{ 500 };       // Value to calculate Fibonacci sequences
-    int seq_size{ 50 };   // Elements of Fibonacci sequence. 50 is a good
-                        // nomber to provoke overflows
+    int begin{ -100 };    // Value from calculate Fibonacci sequences
+    int end{ 100 };       // Value to calculate Fibonacci sequences
+    int seq_size{ 50 };   // Elements of Fibonacci sequence
 
     // Generate Fibonacci sequences
     for (int i = begin; i < end; ++i) {
         fibonacci(i, i + 1, data, seq_size);
-        int& val = data[data.size() - 1];   // Use reference as an alias. §8.5.5
+        int& val = data[data.size() - 1];
         if (val > max) max = val;
         if (val < min) min = val;
         data.clear();                     // Empty vector for next loop

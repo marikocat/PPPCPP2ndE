@@ -1,4 +1,4 @@
-#include "..\std_lib_facilities.h"
+#include "../std_lib_facilities.h"
 
 void print(const string& label, const vector<int>& v)
 {
@@ -24,6 +24,6 @@ void fibonacci(int x, int y, vector<int>& v, int n)
 int main()
 {
 	vector<int> fibNums;
-	fibonacci(1, 2, fibNums, 46);
+	fibonacci(1, 2, fibNums, 7);
 	print("vector of Fibonacci numbers: ", fibNums);
 }
