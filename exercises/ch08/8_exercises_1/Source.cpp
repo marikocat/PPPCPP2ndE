@@ -115,7 +115,7 @@ double primary(Token_stream& ts)
 		return d;
 	}
 	case number:
-		return t.value; // return the number’s value
+		return t.value; // return the numberï¿½s value
 	case name:
 		return st.get(t.name); // return the variable's value
 	case '-':
@@ -242,9 +242,9 @@ double expression(Token_stream& ts)
 //------------------------------------------------------------------------------
 
 double declaration(Token_stream& ts, bool cv)
-// assume we have seen "let”
+// assume we have seen "letï¿½
 // handle: name = expression
-// declare a variable called "name” with the initial value "expression”
+// declare a variable called "nameï¿½ with the initial value "expressionï¿½
 {
 	Token t = ts.get();
 	if (t.kind != name) error("name expected in declaration");
@@ -319,12 +319,12 @@ void print_help()
 void calculate()
 {
 	Token_stream ts(cin);
-	while (cin)
+	while (true)
 		try
 	{
 		cout << prompt; // print prompt
 		Token t = ts.get();
-		while (t.kind == print) t = ts.get(); // first discard all “prints”
+		while (t.kind == print) t = ts.get(); // first discard all ï¿½printsï¿½
 		if (t.kind == quit) return;
 		if (t.kind == help)
 		{
