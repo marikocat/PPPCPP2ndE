@@ -146,7 +146,6 @@ string to_numerals(int i)
 		}
 		else if (i / 100 > 5 && i / 100 <= 8)
 		{
-			cout << "here\n";
 			numerals += roman_numerals[roman_numerals.size() - 2];
 			for (int j = 0; j < i / 100 - 5; ++j)
 			{
@@ -181,7 +180,6 @@ string to_numerals(int i)
 		}
 		else if (i / 10 > 5 && i / 10 <= 8)
 		{
-			cout << "here\n";
 			numerals += roman_numerals[roman_numerals.size() - 4];
 			for (int j = 0; j < i / 10 - 5; ++j)
 			{
@@ -196,7 +194,7 @@ string to_numerals(int i)
 		i -= (i / 10) * 10;
 	}
 
-	if (i > 1)
+	if (i >= 1)
 	{
 		if (i <= 3)
 		{
@@ -216,7 +214,6 @@ string to_numerals(int i)
 		}
 		else if (i > 5 && i <= 8)
 		{
-			cout << "here\n";
 			numerals += roman_numerals[roman_numerals.size() - 6];
 			for (int j = 0; j < i - 5; ++j)
 			{

@@ -1,334 +1,251 @@
 /*
-Simple calculator
+	Simple calculator
 
-Revision history:
-Revised by Bjarne Stroustrup November 2013
-Revised by Bjarne Stroustrup May 2007
-Revised by Bjarne Stroustrup August 2006
-Revised by Bjarne Stroustrup August 2004
-Originally written by Bjarne Stroustrup
-(bs@cs.tamu.edu) Spring 2004.
+	This program implements a basic expression calculator.
+	It supports basic arithmetic operations,
+	including +, -, *, /, %, and !, sqrt(x) and pow(x) functions.
+	Users may declare their own constants and variables
+	and assign new values to variables.
 
-This program implements a basic expression calculator.
-Input from cin; output to cout.
-The grammar for input is:
+	Also this program has four commands,
+	including Print, Quit, Help, Symbols table.
 
-Calculation:
-	Statement
-	Print
-	Quit
-	Calculation Statement
+	Input from cin; output to cout.
 
-Print:
-	;
+	The grammar for input is:
 
-Quit:
-	q
+	Calculation:
+		Command
+		Statement
+		Calculation Statement
 
-Statement:
-	Declaration
-	Expression
-	Assignment
+	Coomand:
+		Print
+		Quit
+		Help
+		Symbols table
 
-Declaration:
-	"let" Name "=" Expression
-	"const" Name "=" Expression
+	Print:
+		";"
+		"\n"
 
-Assignment:
-	Name "=" Expression
+	Quit:
+		"quit"
 
-Expression:
-	Term
-	Expression + Term
-	Expression – Term
-Term:
-	Primary
-	Term * Primary
-	Term / Primary
-	Term % Primary
-Primary:
-	Number
-	Variable Name
-	( Expression )
-	– Primary
-	sqrt Primary
-	pow Primary ',' Primary
-Number:
-	floating-point-literal
+	Help:
+		"help"
 
-Input comes from cin through the Token_stream called ts.
+	Symbols table
+		"table"
+
+	Statement:
+		Declaration
+		Assignment
+		Expression
+
+	Declaration:
+		"let" Name "=" Expression
+		"const" Name "=" Expression
+
+	Assignment:
+		Name "=" Expression
+
+	Expression:
+		Term
+		Expression "+" Term
+		Expression "-" Term
+
+	Term:
+		Secondary
+		Term "*" Secondary
+		Term "/" Secondary
+		Term "%" Secondary
+
+	Secondary:
+		Primary
+		Primary "!"
+
+	Primary:
+		Number
+		Name
+		"(" Expression ")"
+		"{" Expression "}"
+		"-" Primary
+		"+" Primary
+		sqrt Primary
+		pow "(" Expression "," int(Expression) ")"
+
+	Number:
+		floating-point-literal
+
+	Input comes from cin through the Token_stream called ts.
 */
 
-#include "..\std_lib_facilities.h"
+#include "../std_lib_facilities.h"
+#include "Token.h"
+#include "Variable.h"
 #include "Roman_int.h"
 
-struct Token {
-	char kind; // what kind of token
-	int value; // for numbers: a value
-	string name; // for variable names: a name
-	Token(char ch) :kind(ch), value(0) { } // make a Token from a char
-	Token(char ch, int val) :kind(ch), value(val) { } // make a Token from a char and a double
-	Token(char ch, string n) :kind(ch), name(n), value(0) { } // make a Token from a char and a name
-};
-
-class Token_stream {
-	bool full; // is there a Token in the buffer?
-	Token buffer; // where we store a 'unget' Token
-public:
-	Token_stream() :full(0), buffer(0) { }
-
-	Token get(); // get a Token
-	void unget(Token t); // put a Token back
-
-	void ignore(char c); // discard characters up to and including a c
-};
-
-const char constV = 'C';
-const char let = 'L';
-const char quit = 'q';
-const char help = 'h';
-const char print = ';';
-const char number = '8'; // t.kind == number means that t is a number Token
-const char name = 'a';
-const char sqRoot = 'S';
-const char power = 'P';
-const char newline = '\n';
-
-const string constkey = "const"; // definition of const vars
-const string declkey = "#"; // declaration keyword
-const string quitkey = "exit"; // quit keyword
-const string sqrtkey = "sqrt";
-const string powkey = "pow";
-
-void Token_stream::unget(Token t) {
-	if (full) error("unget() into a full buffer");
-	buffer = t;
-	full = true;
-}
-
-Token Token_stream::get()
-{
-	if (full) { full = false; return buffer; }
-	char ch;
-	// cin >> ch; // note that >> skips whitespace (space, newline, tab, etc.)
-	ch = cin.get();
-
-	switch (ch) {
-	case print:
-	case quit:
-	case help:
-	case '=':
-	case '(':
-	case ')':
-	case '+':
-	case '-':
-	case '*':
-	case '/':
-	case '%':
-	case ',':
-		return Token(ch); // let each character represent itself
-	case 'I':
-	case 'V':
-	case 'X':
-	case 'L':
-	case 'C':
-	case 'D':
-	case 'M':
-	{
-		string numerals;
-		numerals += ch;
-		while (cin.get(ch) && is_numeral(ch)) numerals += ch;
-		cin.unget();
-		Roman_int ri{ numerals };
-		return Token{ number, ri.as_int() };
-	}
-	case '#':
-		return Token{ let };
-	default:
-		if (isalpha(ch) || ch == '_') {
-			string s;
-			s += ch;
-			while (cin.get(ch) && (isalpha(ch) || isdigit(ch) || ch == '_')) s += ch;
-			cin.unget();
-			// if (s == "let") return Token{ let };
-			if (s == quitkey) return Token{ quit };
-			if (s == constkey) return Token{ constV };
-			if (s == sqrtkey) return Token{ sqRoot };
-			if (s == powkey) return Token{ power };
-			return Token{ name, s };
-		}
-		else if (isspace(ch)) {
-			if (ch == newline)
-				return Token{ print };
-			else return get();
-		}
-		error("Bad token");
-	}
-}
-
-void Token_stream::ignore(char c)
-{
-	if (full && c == buffer.kind) {
-		full = false;
-		return;
-	}
-	full = false;
-
-	char ch = 0;
-	while (cin >> ch)
-		if (ch == c) return;
-}
-
-struct Variable {
-	string name;
-	int value;
-	bool constVar;
-	Variable(string n, int v, bool cv) :name(n), value(v), constVar(cv) { }
-};
-
-class Symbol_table {
-	vector<Variable> names;
-public:
-	int get_value(string s);
-	void set_value(string s, int d);
-	bool is_declared(string s);
-	int define_name(string var, int val, bool cv);
-};
-
-// vector<Variable> names;
-
-int Symbol_table::get_value(string s)
-{
-	for (int i = 0; i < names.size(); ++i)
-		if (names[i].name == s) return names[i].value;
-	error("get: undefined variable name ", s);
-}
-
-void Symbol_table::set_value(string s, int d)
-{
-	for (int i = 0; i <= names.size(); ++i)
-		if (names[i].name == s) {
-			if (names[i].constVar) error(names[i].name, " is const variable and cannot be redefined");
-			names[i].value = d;
-			return;
-		}
-	error("set: undefined variable name ", s);
-}
-
-bool Symbol_table::is_declared(string s)
-{
-	for (int i = 0; i < names.size(); ++i)
-		if (names[i].name == s) return true;
-	return false;
-}
-
-int Symbol_table::define_name(string var, int val, bool cv)
-{
-	if (is_declared(var)) error(var, " declared twice");
-	names.push_back(Variable(var, val, cv));
-	return val;
-}
+//------------------------------------------------------------------------------
 
 Symbol_table st;
 
-Token_stream ts; // provides get() and unget()
+//------------------------------------------------------------------------------
 
-int expression();
+double expression(Token_stream& ts);
 
-int primary() // read and evaluate a Primary
+//------------------------------------------------------------------------------
+
+double primary(Token_stream& ts)
 {
 	Token t = ts.get();
-	switch (t.kind) {
+	switch (t.kind)
+	{
 	case '(':
 	{
-		int d = expression();
+		double d = expression(ts);
 		t = ts.get();
 		if (t.kind != ')') error("')' expected");
 		return d;
 	}
-	case '-':
-		return -primary();
+	case '{':
+	{
+		double d = expression(ts);
+		t = ts.get();
+		if (t.kind != '}') error("'}' expected");
+		return d;
+	}
 	case number:
-		return t.value; // return the number's value
+		return t.value; // return the number’s value
 	case name:
-		return st.get_value(t.name);
-	case sqRoot:
+		return st.get(t.name); // return the variable's value
+	case '-':
+		return -primary(ts);
+	case '+':
+		return primary(ts);
+	case sqroot:
 	{
 		t = ts.get();
 		if (t.kind != '(') error("'(' expected");
-		ts.unget(t);
-		int d = primary();
-		if (d < 0) error("the square root of a negative number");
+		ts.putback(t);
+		double d = primary(ts);
+		if (d < 0) error("square root of negative number");
 		return sqrt(d);
 	}
 	case power:
 	{
 		t = ts.get();
 		if (t.kind != '(') error("'(' expected");
-		int d = expression();
+		double d = expression(ts);
 		t = ts.get();
 		if (t.kind != ',') error("',' expected");
-		int n = expression();
+		int n = narrow_cast<int>(expression(ts));
 		t = ts.get();
-		if (t.kind == ')') return pow(d, n);
-		else error("Expected ')'");
+		if (t.kind != ')') error("'(' expected");
+		return pow(d, n);
 	}
 	default:
 		error("primary expected");
 	}
 }
 
-int term() // read and evaluate a Term
+//------------------------------------------------------------------------------
+
+double factorial(double d)
 {
-	int left = primary();
-	while (true) {
+	int n = narrow_cast<int>(d);
+
+	if (n < 0) error("factorial not defined for negative values");
+	if (n > 31) error("factorial defined only for ints (too large)");
+
+	if (n == 0)
+		return 1;
+	else
+		return n * factorial(n - 1);
+}
+
+//------------------------------------------------------------------------------
+
+double secondary(Token_stream& ts)
+{
+	double left = primary(ts);
+	while (true)
+	{
 		Token t = ts.get();
-		switch (t.kind) {
-		case '*':
-			left *= primary();
-			break;
-		case '/':
+		if (t.kind == '!')
+			left = factorial(left);
+		else
 		{
-			int d = primary();
-			if (d == 0) error("divide by zero");
-			left /= d;
-			break;
-		}
-		case '%':
-		{
-			int i1 = left;
-			int i2 = primary();
-			if (i2 == 0) error("%: divide by zero");
-			left = i1 % i2;
-			break;
-		}
-		default:
-			ts.unget(t);
+			ts.putback(t);
 			return left;
 		}
 	}
 }
 
-int expression() // read and evaluate a Expression
+//------------------------------------------------------------------------------
+
+double term(Token_stream& ts)
 {
-	int left = term(); // read and evaluate a Term
-	while (true) {
-		Token t = ts.get(); // get the next token
-		switch (t.kind) {
-		case '+':
-			left += term(); // evaluate Term and add
+	double left = secondary(ts);
+	while (true)
+	{
+		Token t = ts.get();
+		switch (t.kind)
+		{
+		case '*':
+			left *= secondary(ts);
 			break;
-		case '-':
-			left -= term(); // evaluate Term and subtract
+		case '/':
+		{
+			double d = secondary(ts);
+			if (d == 0) error("divide by zero");
+			left = narrow_cast<int>(left/d);
 			break;
+		}
+		case '%':
+		{
+			int i1 = narrow_cast<int>(left);
+			int i2 = narrow_cast<int>(secondary(ts));
+			if (i2 == 0) error("%: divide by zero");
+			left = i1 % i2;
+			break;
+		}
 		default:
-			ts.unget(t);
-			return left; // finally: no more + or -: return the answer
+			ts.putback(t);
+			return left;
 		}
 	}
 }
 
-int declaration(bool cv)
+//------------------------------------------------------------------------------
+
+double expression(Token_stream& ts)
+{
+	double left = term(ts);
+	while (true)
+	{
+		Token t = ts.get();
+		switch (t.kind)
+		{
+		case '+':
+			left += term(ts);
+			break;
+		case '-':
+			left -= term(ts);
+			break;
+		default:
+			ts.putback(t);
+			return left;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+
+double declaration(Token_stream& ts, bool cv)
+// assume we have seen "let”
+// handle: name = expression
+// declare a variable called "name” with the initial value "expression”
 {
 	Token t = ts.get();
 	if (t.kind != name) error("name expected in declaration");
@@ -337,98 +254,126 @@ int declaration(bool cv)
 	Token t2 = ts.get();
 	if (t2.kind != '=') error("= missing in declaration of ", var_name);
 
-	int d = expression();
-	st.define_name(var_name, d, cv);
+	double d = expression(ts);
+	st.declare(var_name, d, cv);
 	return d;
 }
 
-int assignment(string n)
+//------------------------------------------------------------------------------
+
+double assignment(Token_stream& ts, string n)
 {
-	int d = expression();
-	st.set_value(n, d);
+	double d = expression(ts);
+	st.set(n, d);
 	return d;
 }
 
-int statement()
+//------------------------------------------------------------------------------
+
+double statement(Token_stream& ts)
 {
 	Token t = ts.get();
-	switch (t.kind) {
+	switch (t.kind)
+	{
+	case constv:
+		return declaration(ts, true);
 	case let:
-		return declaration(false);
-	case constV:
-		return declaration(true);
+		return declaration(ts, false);
 	case name:
 	{
-		char temp = 0;
-		cin >> temp;
-		if (temp == '=') {
-			return assignment(t.name);
-		}
-		else {
-			cin.putback(temp);
-		}
+		char ch;
+		while (cin.get(ch) && isspace(ch) && ch != '\n');
+		if (ch == '=')
+			return assignment(ts, t.name);
+		else
+			cin.putback(ch);
 	}
 	default:
-		ts.unget(t);
-		return expression();
+		ts.putback(t);
+		return expression(ts);
 	}
 }
 
-void clean_up_mess()
+//------------------------------------------------------------------------------
+
+void clean_up_mess(Token_stream& ts)
 {
 	ts.ignore(print);
 }
 
-void printHelp()
+//------------------------------------------------------------------------------
+
+void print_help()
 {
-	cout << "to quit press 'q' (or type 'exit')\n";
-	cout << "to print instructions press 'h'\n";
-	cout << "to print result press ';' or Enter\n";
-	cout << "to define a variable use 'let'\n";
-	cout << "to define a const variable use 'const'\n";
+	cout << "to quit enter 'quit'\n";
+	cout << "to print help instructions enter 'help'\n";
+	cout << "to print symbol table enter 'table'\n";
+	cout << "to print result press ';' or press Enter\n";
+	cout << "to define a variable use 'let' or '#'\n";
+	cout << "to define a constant use 'const'\n";
+	cout << "supported operators: +, -, *, /, %, !\n";
+	cout << "supported functions: sqrt(x), pow(x, n)\n";
 }
 
-const string prompt = "> ";
-const string result = "= ";
+//------------------------------------------------------------------------------
 
-void calculate()
+void calculate(Token_stream& ts)
 {
-	while (true) try {
-		cout << prompt;
+	while (true)
+	try
+	{
+		cout << prompt; // print prompt
 		Token t = ts.get();
-		while (t.kind == print) t = ts.get();
+		while (t.kind == print) t = ts.get(); // first discard all “prints”
 		if (t.kind == quit) return;
-		if (t.kind == help) {
-			printHelp();
+		if (t.kind == help)
+		{
+			print_help();
 			continue;
 		}
-		ts.unget(t);
-		//cout << result << statement() << endl;
-		cout << result << to_numerals(statement()) << endl;
+		if (t.kind == stable)
+		{
+			st.print();
+			continue;
+		}
+		ts.putback(t);
+		double res = statement(ts);
+		cout << result << to_numerals(res) << '\n';
 	}
-	catch (runtime_error& e) {
-		cerr << e.what() << endl;
-		clean_up_mess();
+	catch (exception& e)
+	{
+		cerr << e.what() << '\n';
+		clean_up_mess(ts);
 	}
 }
+
+//------------------------------------------------------------------------------
 
 int main()
+try
+{
+	// predefine names:
+	st.declare("pi", 3.1415926535, true);
+	st.declare("e", 2.7182818284, true);
+	st.declare("k", 1000, true);
 
-try {
-	st.define_name("k", 1000, true);
+	Token_stream ts(cin);
+	calculate(ts);
 
-	calculate();
+	keep_window_open();
 	return 0;
 }
-catch (exception& e) {
-	cerr << "exception: " << e.what() << endl;
-	char c;
-	while (cin >> c && c != ';');
+catch (exception& e)
+{
+	cerr << e.what() << '\n';
+	keep_window_open("~~");
 	return 1;
 }
-catch (...) {
-	cerr << "exception\n";
-	char c;
-	while (cin >> c && c != ';');
+catch (...)
+{
+	cerr << "unknown exception\n";
+	keep_window_open("~~");
 	return 2;
 }
+
+//------------------------------------------------------------------------------
